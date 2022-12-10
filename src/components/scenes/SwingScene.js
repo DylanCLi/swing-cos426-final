@@ -1,6 +1,6 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
-//import { Flower, Land } from 'objects';
+import { Flower, Land } from 'objects';
 import { BasicLights } from 'lights';
 
 class SwingScene extends Scene {
@@ -47,4 +47,4 @@ class SwingScene extends Scene {
     }
 }
 
-export default SeedScene;
+export default SwingScene;

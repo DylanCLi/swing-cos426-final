@@ -9,15 +9,17 @@
 import { WebGLRenderer, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { SwingScene } from 'scenes';
+import SeedScene from './components/scenes/SeedScene';
 
 // Initialize core ThreeJS components
-const scene = new SwingScene();
 const camera = new PerspectiveCamera();
+const scene = new SeedScene(camera);
 const renderer = new WebGLRenderer({ antialias: true });
 
 // Set up camera
-camera.position.set(6, 3, -10);
-camera.lookAt(new Vector3(0, 0, 0));
+let hero = scene.getObjectByName('hero');
+camera.position.set(0, 5, -10);
+//camera.lookAt(0, 5, 5);
 
 // Set up renderer, canvas, and minor CSS adjustments
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -40,6 +42,9 @@ const onAnimationFrameHandler = (timeStamp) => {
     controls.update();
     renderer.render(scene, camera);
     scene.update && scene.update(timeStamp);
+    // let hero = scene.getObjectByName('hero');
+    // camera.position.set(hero.position.x + 10, hero.position.y, hero.position.z);
+    // camera.lookAt(hero.position);
     window.requestAnimationFrame(onAnimationFrameHandler);
 };
 window.requestAnimationFrame(onAnimationFrameHandler);
