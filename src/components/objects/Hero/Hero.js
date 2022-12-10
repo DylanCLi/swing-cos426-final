@@ -20,10 +20,10 @@ class Hero extends THREE.Group {
         // this.state.camera.position.add(new THREE.Vector3(9,0,0));
 
         // add meshes to group
-        const bodyGeo = new THREE.BoxGeometry(0.5,0.5,0.5);
-        const bodyMat = new THREE.MeshToonMaterial();
+        const bodyGeo = new THREE.SphereGeometry(0.5);//THREE.BoxGeometry(0.5,0.5,0.5);
+        const bodyMat = new THREE.MeshPhongMaterial();
         bodyMat.color.setHex(0xff4f58);
-        const bodyMesh = new THREE.Mesh(bodyGeo);
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
         this.add(bodyMesh);
 
         // Add self to parent's update list

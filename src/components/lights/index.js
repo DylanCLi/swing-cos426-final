@@ -1,1 +1,2 @@
-export { default as BasicLights } from './BasicLights.js';
+export { default as Lights } from './Lights.js';
+export * from './Lights'

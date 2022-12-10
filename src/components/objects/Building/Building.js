@@ -12,7 +12,11 @@ class Building extends THREE.Group {
 
         // add meshes to group
         const buildGeo = new THREE.BoxGeometry(1,10,1);
-        const building = new THREE.Mesh(buildGeo);
+        const buildMat = new THREE.MeshPhongMaterial();
+        buildMat.color.setHex(0x4066e0)
+        const building = new THREE.Mesh(buildGeo, buildMat);
+        building.receiveShadow = true;
+        building.castShadow = true;
         this.add(building);
 
         // Add self to parent's update list

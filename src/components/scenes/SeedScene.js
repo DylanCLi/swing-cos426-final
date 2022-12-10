@@ -1,9 +1,8 @@
 import * as Dat from 'dat.gui';
 import * as THREE from 'three';
-import { Scene, Color, Vector3 } from 'three';
-import { Building, Hero, Sky } from 'objects';
-import { BasicLights } from 'lights';
-import Land from '../objects/Land/Land';
+import { Scene, Color, Vector3, Light, DirectionalLight } from 'three';
+import { Building, Hero, Sky, Land } from 'objects';
+import { Lights } from 'lights';
 
 class SeedScene extends Scene {
     constructor(camera) {
@@ -12,9 +11,6 @@ class SeedScene extends Scene {
 
         // Init state
         this.state = {
-            position: new Vector3(1,1,1),
-            //gui: new Dat.GUI(), // Create GUI for scene
-            //rotationSpeed: 0,
             updateList: [],
         };
 
@@ -22,26 +18,26 @@ class SeedScene extends Scene {
         this.background = new Color(0xe0d6ff);
 
         // Add meshes to scene
-        const groundGeo = new THREE.PlaneGeometry()
- 
-        // const buildGeo = new THREE.BoxGeometry(1,1,10);
-        // const building = new THREE.Mesh(buildGeo);
-        // building.position.set(this.position.x,this.position.y,this.position.z);
-        // let buildings = [];
-        // buildings.push(building);
+        const lights = new Lights();        
         const hero = new Hero(this, camera);
         const building = new Building(this);
-        const lights = new BasicLights();
         const sky = new Sky();
         const land = new Land();
-        this.add(lights, building, hero, sky, land);
-        
+        const environment = new THREE.Group();
+        environment.add(building)        
+        // position
         hero.position.add(new THREE.Vector3(0, 5, 5));
-        building.position.add(new THREE.Vector3(0, 0, 10));
+        building.position.add(new THREE.Vector3(-2, 5, 10));
         land.rotation.set(Math.PI / -2, 0, 0);
         land.position.set(0, 0, 0);
-        // land.position.set(0,0,0);
-        // land.position.
+
+        this.add(
+            lights, 
+            building, 
+            hero, 
+            sky, 
+            land);
+
 
         // Populate GUI
         //this.state.gui.add(this.state, 'rotationSpeed', -5, 5);

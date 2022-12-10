@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CircleGeometry } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import MODEL from './land.gltf';
 
@@ -15,11 +16,11 @@ class Land extends THREE.Group {
         //     this.add(gltf.scene);
         // });
 
-        const landGeo = new THREE.PlaneGeometry(10000, 10000);
-        const landMat = new THREE.MeshToonMaterial();
-        //landMat.color.setHex(0xD3D3D3);
-        const land = new THREE.Mesh(landGeo);
-        land.material.color.setHex(0xD3D3D3);
+        const landGeo = new THREE.PlaneGeometry(500, 500);
+        const landMat = new THREE.MeshPhongMaterial();
+        landMat.color.setHex(0xD3D3D3);
+        const land = new THREE.Mesh(landGeo, landMat);
+        land.receiveShadow = true;
         this.add(land);
     }
 }

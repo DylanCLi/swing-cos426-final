@@ -16,10 +16,12 @@ const camera = new PerspectiveCamera();
 const scene = new SeedScene(camera);
 const renderer = new WebGLRenderer({ antialias: true });
 
+renderer.shadowMap.enabled = true;
+
 // Set up camera
-let hero = scene.getObjectByName('hero');
-camera.position.set(0, 5, -10);
-//camera.lookAt(0, 5, 5);
+//let hero = scene.getObjectByName('hero');
+camera.position.set(0, 5, 0);
+camera.lookAt(0, 10, 5);
 
 // Set up renderer, canvas, and minor CSS adjustments
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -31,6 +33,7 @@ document.body.appendChild(canvas);
 
 // Set up controls
 const controls = new OrbitControls(camera, canvas);
+controls.target.set(0,5,5);
 controls.enableDamping = true;
 controls.enablePan = false;
 controls.minDistance = 4;
