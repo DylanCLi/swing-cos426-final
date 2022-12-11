@@ -8,7 +8,6 @@
  */
 import { WebGLRenderer, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { SwingScene } from 'scenes';
 import SeedScene from './components/scenes/SeedScene';
 
 // Initialize core ThreeJS components
@@ -20,7 +19,7 @@ renderer.shadowMap.enabled = true;
 
 // Set up camera
 //let hero = scene.getObjectByName('hero');
-camera.position.set(0, 0, -5);
+camera.position.set(0, 0, -global.params.cameraOffset);
 camera.lookAt(0, 0, 0);
 
 // Set up renderer, canvas, and minor CSS adjustments

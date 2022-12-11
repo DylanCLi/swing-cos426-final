@@ -10,13 +10,16 @@ class Params {
       //                     Physical Constants
       // ====================================================================
       // Damping coefficient for integration
-      this.DAMPING = 0.03;
+      this.DAMPING = 0.0;
   
       // Mass of hero
       this.MASS = 0.1;
+
+      // Moment of intertia of hero
+      this.MOMENT = this.MASS * this.webLength * this.webLength;
   
       // Acceleration due to gravity, scaled up experimentally for effect.
-      this.GRAVITY = 9.8 * 140;
+      this.GRAVITY = 9.8;
   
       // The timestep (or deltaT used in integration of the equations of motion)
       // Smaller values result in a more stable simulation, but becomes slower.
@@ -28,17 +31,37 @@ class Params {
       this.friction = 0.9;
   
       // ====================================================================
+      //              Physical Setup
+      // ====================================================================
+      this.landY = -20;
+      this.buildingHeight = 10;
+      
+      this.webLength = 10;
+
+      this.leftPivot = new THREE.Vector3(3, 5, 5);
+      this.leftPivot.normalize().multiplyScalar(10);
+
+      this.forwardPivot = new THREE.Vector3(0, 5, 6);
+      this.forwardPivot.normalize().multiplyScalar(10);
+
+      this.rightPivot = new THREE.Vector3(-3, 5, 5);
+      this.rightPivot.normalize().multiplyScalar(10);
+
+      // ====================================================================
       //              Rendering properties of the scene
       // ====================================================================
+      this.cameraOffset = 40;
+      
       this.buildingColor = 0x4066e0;
       this.landColor = 0xD3D3D3;
       this.heroColor = 0xff4f58;
       this.skyColor = 0xe0d6ff;
+      this.webColor = 0x000000;
 
       // ====================================================================
       //                 Geometries and Materials
       // ====================================================================
-      this.buildingGeo = new THREE.BoxGeometry(1,10,1);
+      this.buildingGeo = new THREE.BoxGeometry(1,this.buildingHeight,1);
       this.buildingMat = new THREE.MeshPhongMaterial();
     }
   
@@ -56,7 +79,7 @@ class Params {
       */
     }
   }
-  
+  global.params = new Params();
   // var DefaultParams = new Params();
   export var SceneParams = new Params();
   

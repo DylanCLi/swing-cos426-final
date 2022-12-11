@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SceneParams } from '../../../params';
 
 class Web extends THREE.Group {
     constructor(parent) {
@@ -19,7 +20,7 @@ class Web extends THREE.Group {
         // add meshes to group
         const points = [new THREE.Vector3(), parent.state.pivot];
         this.web.geo.setFromPoints(points);
-        this.web.geo.attributes.position.needsUpdate = true;
+        this.web.mat.color = SceneParams.webColor;
         this.web.line = new THREE.Line(this.web.geo, this.web.mat);
         
         if (this.state.inWeb) this.add(this.web.line);
@@ -30,12 +31,14 @@ class Web extends THREE.Group {
 
     update(state) {
         if (state.inWeb) {
+            state.pivot.add(state.offset);
             this.web.geo.setFromPoints([new THREE.Vector3(), state.pivot]);
             // this.web.geo.computeBoundingBox();
             if (!this.state.inWeb) {
                 this.add(this.web.line);
                 this.state.inWeb = true;
             }
+            
         } else if (this.state.inWeb) {
             this.remove(this.web.line);
             this.state.inWeb = false;

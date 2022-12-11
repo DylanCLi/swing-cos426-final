@@ -5,24 +5,19 @@ import MODEL from './land.gltf';
 import { SceneParams } from '../../../params';
 
 class Land extends THREE.Group {
-    constructor() {
+    constructor(parent) {
         // Call parent Group() constructor
         super();
 
-        // const loader = new GLTFLoader();
-
-        // this.name = 'land';
-
-        // loader.load(MODEL, (gltf) => {
-        //     this.add(gltf.scene);
-        // });
-
+        // add mesh
         const landGeo = new THREE.PlaneGeometry(500, 500);
         const landMat = new THREE.MeshPhongMaterial();
         landMat.color.setHex(SceneParams.landColor);
         const land = new THREE.Mesh(landGeo, landMat);
         land.receiveShadow = true;
         this.add(land);
+
+        parent.addToUpdateList(this);
     }
 
     update(state) {
