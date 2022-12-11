@@ -20,8 +20,8 @@ renderer.shadowMap.enabled = true;
 
 // Set up camera
 //let hero = scene.getObjectByName('hero');
-camera.position.set(0, 5, 0);
-camera.lookAt(0, 10, 5);
+camera.position.set(0, 0, -5);
+camera.lookAt(0, 0, 0);
 
 // Set up renderer, canvas, and minor CSS adjustments
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -33,7 +33,7 @@ document.body.appendChild(canvas);
 
 // Set up controls
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(0,5,5);
+controls.target.set(0,0,0);
 controls.enableDamping = true;
 controls.enablePan = false;
 controls.minDistance = 4;
@@ -45,9 +45,6 @@ const onAnimationFrameHandler = (timeStamp) => {
     controls.update();
     renderer.render(scene, camera);
     scene.update && scene.update(timeStamp);
-    // let hero = scene.getObjectByName('hero');
-    // camera.position.set(hero.position.x + 10, hero.position.y, hero.position.z);
-    // camera.lookAt(hero.position);
     window.requestAnimationFrame(onAnimationFrameHandler);
 };
 window.requestAnimationFrame(onAnimationFrameHandler);

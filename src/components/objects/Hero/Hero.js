@@ -1,17 +1,16 @@
 import * as THREE from 'three';
+import { SceneParams } from '../../../params';
 
 class Hero extends THREE.Group {
-    constructor(parent, c) {
+    constructor(parent) {
         // Call parent Group() constructor
         super();
 
         // Init state
         this.state = {
-            camera: c,
             velocity: new THREE.Vector3(-1,0,0),
-            speed: 1/100000,
             inWeb: false,
-            bodyPosition: new THREE.Vector3(),
+            previous: new THREE.Vector3(),
             //webPosition: new THREE.Vector3(),
         };
         this.name = 'hero';
@@ -22,8 +21,10 @@ class Hero extends THREE.Group {
         // add meshes to group
         const bodyGeo = new THREE.SphereGeometry(0.5);//THREE.BoxGeometry(0.5,0.5,0.5);
         const bodyMat = new THREE.MeshPhongMaterial();
-        bodyMat.color.setHex(0xff4f58);
+        bodyMat.color.setHex(SceneParams.heroColor);
         const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+        bodyMesh.castShadow = true;
+        bodyMesh.receiveShadow = true;
         this.add(bodyMesh);
 
         // Add self to parent's update list

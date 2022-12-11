@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SceneParams } from '../../../params';
 
 class Building extends THREE.Group {
     constructor(parent) {
@@ -11,19 +12,20 @@ class Building extends THREE.Group {
         };
 
         // add meshes to group
-        const buildGeo = new THREE.BoxGeometry(1,10,1);
-        const buildMat = new THREE.MeshPhongMaterial();
-        buildMat.color.setHex(0x4066e0)
+        const buildGeo = SceneParams.buildingGeo;
+        const buildMat = SceneParams.buildingMat;
+        buildMat.color.setHex(SceneParams.buildingColor);
         const building = new THREE.Mesh(buildGeo, buildMat);
         building.receiveShadow = true;
         building.castShadow = true;
         this.add(building);
 
         // Add self to parent's update list
-        // parent.addToUpdateList(this);
+        parent.addToUpdateList(this);
     }
 
-    update(timeStamp) {
+    update(state) {
+        this.position.add(state.offset);
         // const old = this.state.mesh.position;
         // this.state.mesh.position.set(old.x, old.y, old.z)
     }
