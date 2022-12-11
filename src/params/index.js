@@ -34,16 +34,18 @@ class Params {
       //              Physical Setup
       // ====================================================================
       this.landY = -20;
-      this.buildingHeight = 10;
+      this.buildingHeight = 30;
       
       this.webLength = 10;
 
+      this.leftRotate = Math.PI / 4;
       this.leftPivot = new THREE.Vector3(3, 5, 5);
       this.leftPivot.normalize().multiplyScalar(10);
 
       this.forwardPivot = new THREE.Vector3(0, 5, 6);
       this.forwardPivot.normalize().multiplyScalar(10);
 
+      this.rightRotate = -Math.PI / 4;
       this.rightPivot = new THREE.Vector3(-3, 5, 5);
       this.rightPivot.normalize().multiplyScalar(10);
 
@@ -61,7 +63,7 @@ class Params {
       // ====================================================================
       //                 Geometries and Materials
       // ====================================================================
-      this.buildingGeo = new THREE.BoxGeometry(1,this.buildingHeight,1);
+      this.buildingGeo = new THREE.BoxGeometry(5, this.buildingHeight, 5);
       this.buildingMat = new THREE.MeshPhongMaterial();
     }
   

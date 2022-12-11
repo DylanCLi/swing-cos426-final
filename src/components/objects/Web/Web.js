@@ -5,7 +5,7 @@ class Web extends THREE.Group {
     constructor(parent) {
         // Call parent Group() constructor
         super();
-
+        this.scene = parent;
         this.web = {
             geo: new THREE.BufferGeometry(),
             mat: new THREE.MeshPhongMaterial(),
@@ -31,17 +31,19 @@ class Web extends THREE.Group {
 
     update(state) {
         if (state.inWeb) {
+            if (state.offset)
             state.pivot.add(state.offset);
             this.web.geo.setFromPoints([new THREE.Vector3(), state.pivot]);
-            // this.web.geo.computeBoundingBox();
             if (!this.state.inWeb) {
                 this.add(this.web.line);
                 this.state.inWeb = true;
             }
             
+            
         } else if (this.state.inWeb) {
             this.remove(this.web.line);
             this.state.inWeb = false;
+            this.scene.applyReleaseForce();
         }
     }
 }

@@ -1,6 +1,6 @@
 import * as Dat from 'dat.gui';
 import * as THREE from 'three';
-import { Scene, Color, Vector3 } from 'three';
+import { Scene, Color, Vector3, MathUtils } from 'three';
 import { Building, Hero, Sky, Land, Web } from 'objects';
 import { Lights } from 'lights';
 
@@ -17,9 +17,11 @@ class SeedScene extends Scene {
             inWeb: false,
             // theta_prev: 0,
             // theta: 0,
+            forward: global.params.forwardPivot,
             pivot: new THREE.Vector3(),
             offset: new THREE.Vector3(),
             netForce: new THREE.Vector3(),
+            buildings: [],
             updateList: [],
         };
 
@@ -37,7 +39,7 @@ class SeedScene extends Scene {
         // position
         hero.position.set(0,0,0);
         building.position.add(
-            new THREE.Vector3(-2, global.params.landY + global.params.buildingHeight / 2, 5));
+            new THREE.Vector3(-5, global.params.landY + global.params.buildingHeight / 2, 5));
         land.rotation.set(Math.PI / -2, 0, 0);
         land.position.set(0, global.params.landY, 0);
 
@@ -68,6 +70,13 @@ class SeedScene extends Scene {
 
         // camera offset
         if (this.state.inWeb) {
+            let newCam = new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
+            newCam.normalize().multiplyScalar(global.params.cameraOffset);
+            this.camera.position.set(newCam.x, 0, newCam.z);
+            // let xzOffset = new THREE.Vector3(-this.state.offset.x, 0, -this.state.offset.z);
+            // let zAxis = new this.camera.position;
+            // let rotation = zAxis.angleTo(xzOffset);
+            // this.camera.position.applyAxisAngle(new THREE.Vector3(0,1,0), rotation);
             // let camOffset = new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
             // camOffset.normalize().multiplyScalar(global.params.cameraOffset);
             // this.camera.position.set(camOffset.x, 0, camOffset.z);
@@ -83,20 +92,40 @@ class SeedScene extends Scene {
         // Ignore keypresses typed into a text box
         if (event.target.tagName === "INPUT") { return; }
 
+        let angle = null;
         if (event.key == "q") {
-            this.scene.state.pivot = global.params.leftPivot;
+            angle = global.params.leftRotate;
+            // this.scene.state.pivot = global.params.leftPivot;
             this.scene.state.inWeb = true;
         }
         else if (event.key == "w") {
-            this.scene.state.pivot = global.params.forwardPivot;
+            angle = 0;
+            // this.scene.state.pivot = global.params.forwardPivot;
             this.scene.state.inWeb = true;
         }
         else if (event.key == "e") {
-            this.scene.state.pivot = global.params.rightPivot;
+            angle = global.params.rightRotate;
+            // this.scene.state.pivot = global.params.rightPivot;
             this.scene.state.inWeb = true;
         } else if (event.key == " ") {
             this.scene.state.inWeb = false;
         }
+
+        // change pivot
+        if (this.scene.state.inWeb) {
+            const yAxis = new THREE.Vector3(0,1,0);
+            const zAxis = new THREE.Vector3(0,0,1);
+            let forward = this.scene.camera.position.clone().multiplyScalar(-1).normalize();
+            const rotation = zAxis.angleTo(forward) + angle;
+            this.scene.state.pivot = global.params.forwardPivot.clone().applyAxisAngle(yAxis, rotation);
+
+            //this.scene.state.pivot = this.scene.camera.position.clone().applyAxisAngle(yAxis, angle);
+            //this.scene.camera.position.applyAxisAngle(yAxis, angle);
+        }
+    }
+
+    applyReleaseForce() {
+
     }
 
     applyForces() {
@@ -112,6 +141,8 @@ class SeedScene extends Scene {
             this.state.netForce.add(tension);
             console.log(this.state.netForce.y);
         }
+
+        // web release
 
         // spring
         if (this.state.inWeb) {
@@ -148,6 +179,9 @@ class SeedScene extends Scene {
             pivot_next.normalize().multiplyScalar(global.params.webLength);
             x_next = this.state.pivot.clone().sub(pivot_next);
         }
+
+        //this.state.offset.cross()
+        //if (this.state)
         
         this.state.offset = x_next.multiplyScalar(-1);
     }
