@@ -19,7 +19,7 @@ class SeedScene extends Scene {
             //forward: global.params.forwardPivot,
             pivot: new THREE.Vector3(),
             offset: new THREE.Vector3(),
-            swingNorm: new THREE.Vector3(),
+            swingNorm: null,//new THREE.Vector3(),
             netForce: new THREE.Vector3(),
             buildings: [],
             updateList: [],
@@ -192,19 +192,23 @@ class SeedScene extends Scene {
 
         x_next.multiplyScalar(-1);
 
-        const norm = x_next.clone().cross(this.state.pivot);
-        if (norm.dot(this.state.swingNorm) < 0) {
-            // changed swing direction abort web
-            this.state.swingNorm = new THREE.Vector3();
-            this.applyRelease();
-        } else {
-            // update state
-            this.state.swingNorm = norm;
-            const dispOffset = new THREE.Vector2(x_next.x, x_next.y);
-            this.state.displacement.add(dispOffset);
-            this.state.offset = x_next;
+        // only set swingnorm at beginning of swing
+        if (this.state.inWeb) {
+            const norm = x_next.clone().cross(this.state.pivot);
+            if (this.state.swingNorm == null) {
+                this.state.swingNorm = norm;
+            } else if (norm.dot(this.state.swingNorm) < 0) {
+                // changed swing direction abort web
+                this.state.swingNorm = null;
+                this.state.netForce = new THREE.Vector3();
+                this.applyRelease();
+                return;
+            } 
         }
 
+        const dispOffset = new THREE.Vector2(x_next.x, x_next.y);
+        this.state.displacement.add(dispOffset);
+        this.state.offset = x_next;
         this.state.netForce = new THREE.Vector3();
     }
 }
