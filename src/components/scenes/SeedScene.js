@@ -1,67 +1,28 @@
 import * as Dat from 'dat.gui';
 import * as THREE from 'three';
 import { Scene, Color, Vector3, MathUtils } from 'three';
-import { Building, Hero, Sky, Land, Web } from 'objects';
+import { Hero, Land, Web, City } from 'objects';
 import { Lights } from 'lights';
 
 class SeedScene extends Scene {
     constructor(camera) {
         // Call parent Scene() constructor
         super();
-        window.scene = this;
 
+        window.scene = this;
         this.camera = camera;
 
         // Init state
         this.state = {
             displacement: new THREE.Vector2(),
             inWeb: false,
-            //forward: global.params.forwardPivot,
             pivot: new THREE.Vector3(),
             offset: new THREE.Vector3(),
-            swingNorm: null,//new THREE.Vector3(),
+            swingNorm: null,
             netForce: new THREE.Vector3(),
             buildings: [],
             updateList: [],
         };
-
-        // coordinate of center and starting point
-        const center = (global.params.citySize + 1) / 2;
-
-        // populate city data
-        const BUILD_PROB_0 = global.params.buildCondProb[0] * global.params.buildProb;
-        const BUILD_PROB_1 = global.params.buildProb;
-        this.city = new Array(global.params.citySize);//Array.from(Array(global.params.citySize), () => new Array(global.params.citySize));
-        for (var i = 0; i < this.city.length; i++) {
-            const a = new Array(global.params.citySize);
-            for (var j = 0; j < a.length; j++) {
-                if (i == center && j == center) {
-                    a[j] = -1;
-                    continue;
-                }
-                const p = Math.random();
-                if (p < BUILD_PROB_0) a[j] = 0;
-                else if (p < BUILD_PROB_1) a[j] = 1;
-                else a[j] = -1;
-            }
-            this.city[i] = a;
-        }
-
-        // create building meshes
-        const WIDTH = global.params.buildingWidth;
-        const lo = Math.max(center - global.params.visRange, 0);
-        const hi = Math.min(center + global.params.visRange, this.city.length - 1);
-        for (var i = lo; i < hi; i++) {
-            for (var j = lo; j < hi; j++) {
-                if (this.city[i][j] >= 0) {
-                    const b = new Building(this, this.city[i][j]);
-                    this.add(b);
-                    b.position.set((i - center) * WIDTH, 
-                                    global.params.buildingHeight[this.city[i][j]] / 2 + global.params.landY, 
-                                    (j - center) * WIDTH)
-                }
-            }
-        }
 
         // Set background to a nice color
         this.background = new Color(global.params.skyColor);
@@ -69,25 +30,21 @@ class SeedScene extends Scene {
         // Add meshes to scene
         const lights = new Lights();        
         const hero = new Hero(this);
-        //const building = new Building(this);
-        const sky = new Sky();
         const land = new Land(this);
         const web = new Web(this); 
+        const city = new City(this);
 
         // position
         hero.position.set(0,0,0);
-        // building.position.add(
-        //     new THREE.Vector3(-5, global.params.landY + global.params.buildingHeight / 2, 5));
         land.rotation.set(Math.PI / -2, 0, 0);
         land.position.set(0, global.params.landY, 0);
 
         this.add(
             lights, 
-            //building, 
             hero, 
-            //sky, 
             web,
-            land);
+            land,
+            city);
 
 
         // event handlers
@@ -104,11 +61,15 @@ class SeedScene extends Scene {
 
     update(timeStamp) {
         this.applyGravity();
-        if (this.state.inWeb) this.applyTension();
+        if (this.state.inWeb) {
+            this.applyTension();
+            // this.applyPull();
+        }
         this.integrate();
 
         // camera offset
-        if (this.state.inWeb) this.updateCamera();
+        //if (this.state.inWeb) 
+        this.updateCamera();
 
         // Call update for each object in the updateList
         for (const obj of this.state.updateList) {
@@ -143,7 +104,8 @@ class SeedScene extends Scene {
 
     changePivot(angle) {
         const yAxis = new THREE.Vector3(0,1,0);
-        let forward = this.camera.position.clone().multiplyScalar(-1).normalize();
+        //let forward = this.state.offset.clone().multiplyScalar(-1).normalize(); 
+        const forward = this.camera.position.clone().multiplyScalar(-1).normalize();
         const elevation = global.params.tanPhi;
         forward.setComponent(1, elevation).normalize().multiplyScalar(global.params.webLength);
         forward.applyAxisAngle(yAxis, angle);
@@ -154,7 +116,11 @@ class SeedScene extends Scene {
     }
 
     updateCamera() {
-        let newPos = new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
+        // average curr and new?
+        // const currPos = this.camera.position.clone();
+        let newPos = (this.state.offset.x == 0 && this.state.offset.z == 0) ?
+                        new Vector3(0, 0, 1) :
+                        new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
         newPos.normalize().multiplyScalar(global.params.cameraOffset);
         this.camera.position.set(newPos.x, 0, newPos.z);
     }
@@ -166,13 +132,20 @@ class SeedScene extends Scene {
 
     applyTension() {
         let tension = this.state.pivot.clone().normalize();
-        tension.multiplyScalar(Math.abs(this.state.netForce.dot(tension)));
+        const slackFactor = (Math.min(this.state.pivot.y, 0) * -1) + 1;
+        tension.multiplyScalar(Math.abs(this.state.netForce.dot(tension)) / slackFactor);
         this.state.netForce.add(tension);
+    }
+
+    // to accelerate along swing
+    applyPull() {
+        let force = this.state.offset.clone().multiplyScalar(-1.1);
+        this.state.netForce.add(force);
     }
 
     applyRelease() {
         this.state.inWeb = false;
-        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y), -this.state.offset.y);
+        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y), -this.state.offset.z);
         force.normalize().multiplyScalar(global.params.STRENGTH);
         this.state.netForce.add(force);
     }
@@ -199,13 +172,18 @@ class SeedScene extends Scene {
         // only set swingnorm at beginning of swing
         if (this.state.inWeb) {
             const norm = x_next.clone().cross(this.state.pivot);
+
             if (this.state.swingNorm == null) {
                 this.state.swingNorm = norm;
-            } else if (norm.dot(this.state.swingNorm) < 0) {
-                // changed swing direction abort web
+            }
+
+            // changed swing direction: abort web and redo calc
+            else if (norm.dot(this.state.swingNorm) < 0.1) {
                 this.state.swingNorm = null;
                 this.state.netForce = new THREE.Vector3();
+                this.applyGravity();
                 this.applyRelease();
+                this.integrate();
                 return;
             } 
         }

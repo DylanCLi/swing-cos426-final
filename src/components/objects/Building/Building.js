@@ -30,7 +30,7 @@ class Building extends THREE.Group {
         this.add(building);
 
         // Add self to parent's update list
-        parent.addToUpdateList(this);
+        // parent.addToUpdateList(this);
     }
 
     update(state) {

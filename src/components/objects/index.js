@@ -4,3 +4,4 @@ export * from './Building';
 export * from './Hero';
 export * from './Sky';
 export * from './Web';
+export * from './City';
