@@ -16,6 +16,7 @@ class SeedScene extends Scene {
         this.state = {
             displacement: new THREE.Vector2(),
             inWeb: false,
+            webDir: "",
             pivot: new THREE.Vector3(),
             offset: new THREE.Vector3(),
             swingNorm: null,
@@ -83,26 +84,30 @@ class SeedScene extends Scene {
 
         if (!this.scene.state.inWeb) {
             let angle = null;
+            let dir = "";
             if (event.key == "q") {
                 angle = global.params.leftRotate;
+                dir = "left";
             }
             else if (event.key == "w") {
                 angle = 0;
+                dir = "forw";
             }
             else if (event.key == "e") {
                 angle = global.params.rightRotate;
+                dir = "right"
             }
 
             if (angle != null) {
                 this.scene.state.inWeb = true;
-                this.scene.changePivot(angle);
+                this.scene.changePivot(angle, dir);
             }
         } else if (event.key == " ") {
             this.scene.applyRelease();
         }
     }
 
-    changePivot(angle) {
+    changePivot(angle, dir) {
         const yAxis = new THREE.Vector3(0,1,0);
         //let forward = this.state.offset.clone().multiplyScalar(-1).normalize(); 
         const forward = this.camera.position.clone().multiplyScalar(-1).normalize();
@@ -110,16 +115,16 @@ class SeedScene extends Scene {
         forward.setComponent(1, elevation).normalize().multiplyScalar(global.params.webLength);
         forward.applyAxisAngle(yAxis, angle);
         this.state.pivot = forward;
+        this.state.webDir = dir;
         // const zAxis = new THREE.Vector3(0,0,1);
         //const rotation = zAxis.angleTo(forward) + angle;
         //this.state.pivot = global.params.forwardPivot.clone().applyAxisAngle(yAxis, rotation);
     }
 
     updateCamera() {
+
         if (this.state.offset.x == 0 && this.state.offset.z == 0) {
-            let newPos = new Vector3(0, 0, 1);
-            newPos.normalize().multiplyScalar(global.params.cameraOffset);
-            this.camera.position.set(newPos.x, 0, newPos.z);
+            this.camera.position.set(0, 0, global.params.cameraOffset);
         } else {
             const forward = new Vector2(this.state.offset.x, this.state.offset.z);
             const curr = new Vector2(this.camera.position.x, this.camera.position.z);
@@ -127,19 +132,15 @@ class SeedScene extends Scene {
             if (angle > Math.PI) angle -= Math.PI * 2;
             else if (angle < -Math.PI) angle += Math.PI * 2;
             const sign = angle > 0 ? 1 : -1;
+
+            if (this.state.webDir == "left" && sign != 1) return;
+            if (this.state.webDir == "right" && sign != -1) return;
+
             if (Math.abs(angle) > global.params.maxAngleOffset) {
                 angle = global.params.maxAngleOffset * sign;
             }
             this.camera.position.applyAxisAngle(new Vector3(0,1,0), angle);
         }
-
-        
-
-        // let newPos = (this.state.offset.x == 0 && this.state.offset.z == 0) ?
-        //                 new Vector3(0, 0, 1) :
-        //                 new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
-        // newPos.normalize().multiplyScalar(global.params.cameraOffset);
-        // this.camera.position.set(newPos.x, 0, newPos.z);
     }
 
     applyGravity() {
@@ -162,7 +163,8 @@ class SeedScene extends Scene {
 
     applyRelease() {
         this.state.inWeb = false;
-        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y * 0.5), -this.state.offset.z);
+        this.state.webDir = "";
+        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y * 0.1), -this.state.offset.z);
         force.normalize().multiplyScalar(global.params.STRENGTH);
         this.state.netForce.add(force);
     }

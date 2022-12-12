@@ -2,17 +2,18 @@ import * as THREE from 'three';
 import { CircleGeometry } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import MODEL from './land.gltf';
-import { SceneParams } from '../../../params';
 
 class Land extends THREE.Group {
     constructor(parent) {
         // Call parent Group() constructor
         super();
 
+        const LENGTH = (global.params.visRange * 2 + 1) * global.params.buildingWidth;
+
         // add mesh
-        const landGeo = new THREE.PlaneGeometry(500, 500);
+        const landGeo = new THREE.PlaneGeometry(LENGTH, LENGTH);
         const landMat = new THREE.MeshPhongMaterial();
-        landMat.color.setHex(SceneParams.landColor);
+        landMat.color.setHex(global.params.landColor);
         const land = new THREE.Mesh(landGeo, landMat);
         land.receiveShadow = true;
         this.add(land);

@@ -49,6 +49,8 @@ class Params {
         // ====================================================================
         // distance of camera behind hero
         this.cameraOffset = 40;
+
+        // max rotation of camera per frame
         this.maxAngleOffset = Math.PI / 100;
         
         // colors

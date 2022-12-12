@@ -38,7 +38,7 @@ class City extends THREE.Group {
                     b.position.set((i - this.CENTER) * this.WIDTH, 
                                     global.params.buildingHeight[this.data[i][j]] / 2 + global.params.landY, 
                                     (j - this.CENTER) * this.WIDTH);
-                    this.data[i][j] += global.params.numTypes; // 
+                    this.data[i][j] += global.params.numTypes;
                 }
             }
         }
