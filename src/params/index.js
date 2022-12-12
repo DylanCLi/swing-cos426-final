@@ -20,6 +20,9 @@ class Params {
   
       // Acceleration due to gravity, scaled up experimentally for effect.
       this.GRAVITY = 9.8;
+
+      // Release strength
+      this.STRENGTH = 5.0;
   
       // The timestep (or deltaT used in integration of the equations of motion)
       // Smaller values result in a more stable simulation, but becomes slower.
@@ -33,37 +36,57 @@ class Params {
       // ====================================================================
       //              Physical Setup
       // ====================================================================
-      this.landY = -20;
-      this.buildingHeight = 30;
+      this.landY = -40;
+
+      this.buildingWidth = 10;
+      this.buildingHeight = [ 30, 50 ];
       
       this.webLength = 10;
 
-      this.leftRotate = Math.PI / 4;
-      this.leftPivot = new THREE.Vector3(3, 5, 5);
-      this.leftPivot.normalize().multiplyScalar(10);
+      this.leftRotate = Math.PI / 6;
+    //   this.leftPivot = new THREE.Vector3(3, 5, 5);
+    //   this.leftPivot.normalize().multiplyScalar(10);
 
       this.forwardPivot = new THREE.Vector3(0, 5, 6);
       this.forwardPivot.normalize().multiplyScalar(10);
 
-      this.rightRotate = -Math.PI / 4;
-      this.rightPivot = new THREE.Vector3(-3, 5, 5);
-      this.rightPivot.normalize().multiplyScalar(10);
+      this.rightRotate = -Math.PI / 6;
+    //   this.rightPivot = new THREE.Vector3(-3, 5, 5);
+    //   this.rightPivot.normalize().multiplyScalar(10);
 
       // ====================================================================
       //              Rendering properties of the scene
       // ====================================================================
+      // distance of camera behind hero
       this.cameraOffset = 40;
       
+      // colors
       this.buildingColor = 0x4066e0;
       this.landColor = 0xD3D3D3;
       this.heroColor = 0xff4f58;
       this.skyColor = 0xe0d6ff;
       this.webColor = 0x000000;
 
+      // probability of building on a city grid
+      this.buildProb = 0.1;
+
+      // probability of building being of type _
+      this.buildCondProb = [ 0.5, 0.5 ];
+      this.buildProb1 = this.buildProb * this.buildCondProb[0];
+
+      // dimensions of city grid
+      this.citySize = 51;
+
+      // number of grids away to render
+      this.visRange = 10;
+
       // ====================================================================
       //                 Geometries and Materials
       // ====================================================================
-      this.buildingGeo = new THREE.BoxGeometry(5, this.buildingHeight, 5);
+      this.buildingGeo = [
+        new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[0], this.buildingWidth),
+        new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[1], this.buildingWidth)
+      ];
       this.buildingMat = new THREE.MeshPhongMaterial();
     }
   

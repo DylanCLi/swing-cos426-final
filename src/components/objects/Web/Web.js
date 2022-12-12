@@ -43,7 +43,7 @@ class Web extends THREE.Group {
         } else if (this.state.inWeb) {
             this.remove(this.web.line);
             this.state.inWeb = false;
-            this.scene.applyReleaseForce();
+            //this.scene.applyReleaseForce();
         }
     }
 }

@@ -2,7 +2,10 @@ import * as THREE from 'three';
 import { SceneParams } from '../../../params';
 
 class Building extends THREE.Group {
-    constructor(parent) {
+    constructor(parent, type) {
+        // invalid building type
+        if (type < 0 || type >= global.params.buildingHeight.length) return;
+
         // Call parent Group() constructor
         super();
 
@@ -12,9 +15,15 @@ class Building extends THREE.Group {
         };
 
         // add meshes to group
-        const buildGeo = SceneParams.buildingGeo;
-        const buildMat = SceneParams.buildingMat;
-        buildMat.color.setHex(SceneParams.buildingColor);
+        let buildGeo = global.params.buildingGeo[type];
+        let buildMat = global.params.buildingMat;
+
+        // if (type == 1) buildGeo = global.params.buildingGeo1;
+        // else if (type == 2) buildGeo = global.params.buildingGeo2;
+        // else buildGeo = global.params.buildingGeo1;
+
+        buildMat.color.setHex(global.params.buildingColor);
+
         const building = new THREE.Mesh(buildGeo, buildMat);
         building.receiveShadow = true;
         building.castShadow = true;
