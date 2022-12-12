@@ -143,10 +143,14 @@ class SeedScene extends Scene {
 
     changePivot(angle) {
         const yAxis = new THREE.Vector3(0,1,0);
-        const zAxis = new THREE.Vector3(0,0,1);
         let forward = this.camera.position.clone().multiplyScalar(-1).normalize();
-        const rotation = zAxis.angleTo(forward) + angle;
-        this.state.pivot = global.params.forwardPivot.clone().applyAxisAngle(yAxis, rotation);
+        const elevation = global.params.tanPhi;
+        forward.setComponent(1, elevation).normalize().multiplyScalar(global.params.webLength);
+        forward.applyAxisAngle(yAxis, angle);
+        this.state.pivot = forward;
+        // const zAxis = new THREE.Vector3(0,0,1);
+        //const rotation = zAxis.angleTo(forward) + angle;
+        //this.state.pivot = global.params.forwardPivot.clone().applyAxisAngle(yAxis, rotation);
     }
 
     updateCamera() {

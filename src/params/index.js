@@ -47,6 +47,7 @@ class Params {
     //   this.leftPivot = new THREE.Vector3(3, 5, 5);
     //   this.leftPivot.normalize().multiplyScalar(10);
 
+      this.tanPhi = 3/4;
       this.forwardPivot = new THREE.Vector3(0, 5, 6);
       this.forwardPivot.normalize().multiplyScalar(10);
 
