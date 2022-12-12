@@ -49,6 +49,7 @@ class Params {
         // ====================================================================
         // distance of camera behind hero
         this.cameraOffset = 40;
+        this.maxAngleOffset = Math.PI / 100;
         
         // colors
         this.buildingColor = 0x4066e0;

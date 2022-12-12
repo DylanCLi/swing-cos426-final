@@ -1,6 +1,6 @@
 import * as Dat from 'dat.gui';
 import * as THREE from 'three';
-import { Scene, Color, Vector3, MathUtils } from 'three';
+import { Scene, Color, Vector3, MathUtils, Vector2 } from 'three';
 import { Hero, Land, Web, City } from 'objects';
 import { Lights } from 'lights';
 
@@ -116,13 +116,30 @@ class SeedScene extends Scene {
     }
 
     updateCamera() {
-        // average curr and new?
-        // const currPos = this.camera.position.clone();
-        let newPos = (this.state.offset.x == 0 && this.state.offset.z == 0) ?
-                        new Vector3(0, 0, 1) :
-                        new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
-        newPos.normalize().multiplyScalar(global.params.cameraOffset);
-        this.camera.position.set(newPos.x, 0, newPos.z);
+        if (this.state.offset.x == 0 && this.state.offset.z == 0) {
+            let newPos = new Vector3(0, 0, 1);
+            newPos.normalize().multiplyScalar(global.params.cameraOffset);
+            this.camera.position.set(newPos.x, 0, newPos.z);
+        } else {
+            const forward = new Vector2(this.state.offset.x, this.state.offset.z);
+            const curr = new Vector2(this.camera.position.x, this.camera.position.z);
+            let angle = curr.angle() - forward.angle();
+            if (angle > Math.PI) angle -= Math.PI * 2;
+            else if (angle < -Math.PI) angle += Math.PI * 2;
+            const sign = angle > 0 ? 1 : -1;
+            if (Math.abs(angle) > global.params.maxAngleOffset) {
+                angle = global.params.maxAngleOffset * sign;
+            }
+            this.camera.position.applyAxisAngle(new Vector3(0,1,0), angle);
+        }
+
+        
+
+        // let newPos = (this.state.offset.x == 0 && this.state.offset.z == 0) ?
+        //                 new Vector3(0, 0, 1) :
+        //                 new THREE.Vector3(this.state.offset.x, 0, this.state.offset.z);
+        // newPos.normalize().multiplyScalar(global.params.cameraOffset);
+        // this.camera.position.set(newPos.x, 0, newPos.z);
     }
 
     applyGravity() {
@@ -145,7 +162,7 @@ class SeedScene extends Scene {
 
     applyRelease() {
         this.state.inWeb = false;
-        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y), -this.state.offset.z);
+        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y * 0.5), -this.state.offset.z);
         force.normalize().multiplyScalar(global.params.STRENGTH);
         this.state.netForce.add(force);
     }
@@ -178,7 +195,7 @@ class SeedScene extends Scene {
             }
 
             // changed swing direction: abort web and redo calc
-            else if (norm.dot(this.state.swingNorm) < 0.1) {
+            else if (norm.dot(this.state.swingNorm) < 0.1 || this.state.pivot.y < 0.1) {
                 this.state.swingNorm = null;
                 this.state.netForce = new THREE.Vector3();
                 this.applyGravity();
