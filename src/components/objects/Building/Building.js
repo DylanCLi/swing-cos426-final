@@ -1,33 +1,41 @@
 import * as THREE from 'three';
-import { SceneParams } from '../../../params';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+// import MODEL from './scene.gltf';
+// require('./scene.bin');
+// require('./textures/lambert1_baseColor.jpeg');
+// require('./textures/lambert1_emissive.jpeg');
+// require('./textures/lambert1_metallicRoughness.png');
+// require('./textures/lambert1_normal.png');
 
 class Building extends THREE.Group {
     constructor(parent, type) {
         // invalid building type
-        if (type < 0 || type >= global.params.buildingHeight.length) return;
+        if (type < 0 || type >= global.params.numTypes) return;
 
         // Call parent Group() constructor
         super();
 
         // Init state
-        this.state = {
-            //mesh: new THREE.Mesh(buildGeo),
-        };
+        // this.state = {
+        //     mesh: new THREE.Mesh(buildGeo),
+        // };
+        // var b;
+        // const loader = new GLTFLoader();
+        // loader.load(MODEL, (gltf) => {
+        //     b = gltf.scene;
+        //     this.add(gltf.scene);
+        // });
 
         // add meshes to group
         let buildGeo = global.params.buildingGeo[type];
         let buildMat = global.params.buildingMat;
-
-        // if (type == 1) buildGeo = global.params.buildingGeo1;
-        // else if (type == 2) buildGeo = global.params.buildingGeo2;
-        // else buildGeo = global.params.buildingGeo1;
 
         buildMat.color.setHex(global.params.buildingColor);
 
         const building = new THREE.Mesh(buildGeo, buildMat);
         building.receiveShadow = true;
         building.castShadow = true;
-        this.add(building);
+        // this.add(building);
 
         // Add self to parent's update list
         // parent.addToUpdateList(this);

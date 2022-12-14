@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { CircleGeometry } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import MODEL from './land.gltf';
+//import MODEL from './land.gltf';
 
 class Land extends THREE.Group {
     constructor(parent) {
         // Call parent Group() constructor
         super();
 
-        const LENGTH = (global.params.visRange * 2 + 1) * global.params.buildingWidth;
+        const LENGTH = (global.params.citySize * 2 + 1) * global.params.buildingWidth;
 
         // add mesh
         const landGeo = new THREE.PlaneGeometry(LENGTH, LENGTH);

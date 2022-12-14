@@ -27,21 +27,23 @@ class Params {
         // Similar to coefficient of friction
         // 0 = frictionless, 1 = objects sticks in place
         this.friction = 0.9;
+
+        this.EPS = 0.000001;
     
         // ====================================================================
         //                      Physical Setup
         // ====================================================================
         // initial height of land
-        this.landY = -40;
+        this.initHeight = 70;
         
         // length of web
-        this.webLength = 10;
+        this.webLength = 20;
 
         // angle to rotate to web shoot left or right
         this.leftRotate = Math.PI / 6;
         this.rightRotate = -Math.PI / 6;
 
-        // rise over run of initial web
+        // rise over run of initial web shot
         this.tanPhi = 3/4;
 
         // ====================================================================
@@ -51,27 +53,27 @@ class Params {
         this.cameraOffset = 40;
 
         // max rotation of camera per frame
-        this.maxAngleOffset = Math.PI / 100;
+        this.maxAngleOffset = Math.PI / 200;
         
         // colors
         this.buildingColor = 0x4066e0;
-        this.landColor = 0xD3D3D3;
+        this.landColor = 0x000000;
         this.heroColor = 0xff4f58;
-        this.skyColor = 0xe0d6ff;
-        this.webColor = 0x000000;
+        this.skyColor = 0xe000053;
+        this.webColor = 0xFFFFFF;
 
         // ====================================================================
         //                      City Setup 
         // ====================================================================
         // number of types of buildings
-        this.numTypes = 2;
+        this.numTypes = 4;
 
         // dimensions
         this.buildingWidth = 15;
-        this.buildingHeight = [ 30, 50 ];
+        this.buildingHeight = [ this.initHeight, this.initHeight, 30, 50 ];
         
         // probability of building on a city grid
-        this.buildProb = 0.1;
+        this.buildProb = 0.2;
 
         // probability of building being of type _
         this.buildCondProb = [ 0.5, 0.5 ];
@@ -79,6 +81,9 @@ class Params {
 
         // dimensions of city grid
         this.citySize = 51;
+
+        // padding around destination and start
+        this.padding = 3;
 
         // number of grids away to render
         this.visRange = 25;
@@ -88,9 +93,12 @@ class Params {
         // ====================================================================
         this.buildingGeo = [
             new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[0], this.buildingWidth),
-            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[1], this.buildingWidth)
+            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[1], this.buildingWidth),
+            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[2], this.buildingWidth),
+            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[3], this.buildingWidth)
         ];
         this.buildingMat = new THREE.MeshPhongMaterial();
+        this.buildingMat.transparent = true;
     }
   
     // (Re)define all the properties that are derived from others

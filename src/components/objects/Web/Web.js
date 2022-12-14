@@ -21,7 +21,7 @@ class Web extends THREE.Group {
         const points = [new THREE.Vector3(), parent.state.pivot];
         this.web.geo.setFromPoints(points);
         this.web.mat.color = SceneParams.webColor;
-        this.web.line = new THREE.Line(this.web.geo, this.web.mat);
+        this.web.line = new THREE.Line(this.web.geo, /*this.web.mat*/);
         
         if (this.state.inWeb) this.add(this.web.line);
 

@@ -5,16 +5,19 @@ import { Hero, Land, Web, City } from 'objects';
 import { Lights } from 'lights';
 
 class SeedScene extends Scene {
-    constructor(camera) {
+    constructor(camera, renderer) {
         // Call parent Scene() constructor
         super();
 
         window.scene = this;
         this.camera = camera;
+        this.renderer = renderer;
 
         // Init state
         this.state = {
-            displacement: new THREE.Vector2(),
+            started: true,
+            displacement: new THREE.Vector3(0, global.params.initHeight, 0),
+            inAir: false,
             inWeb: false,
             webDir: "",
             pivot: new THREE.Vector3(),
@@ -38,7 +41,8 @@ class SeedScene extends Scene {
         // position
         hero.position.set(0,0,0);
         land.rotation.set(Math.PI / -2, 0, 0);
-        land.position.set(0, global.params.landY, 0);
+        const offset = 0//((global.params.citySize - 1) / 2 - global.params.padding) * global.params.buildingWidth;
+        land.position.set(0, -global.params.initHeight, offset);
 
         this.add(
             lights, 
@@ -61,6 +65,7 @@ class SeedScene extends Scene {
     }
 
     update(timeStamp) {
+        if (!this.state.started) return;
         this.applyGravity();
         if (this.state.inWeb) {
             this.applyTension();
@@ -69,8 +74,13 @@ class SeedScene extends Scene {
         this.integrate();
 
         // camera offset
-        //if (this.state.inWeb) 
-        this.updateCamera();
+        if (this.state.inWeb) this.updateCamera();
+
+        // const blocker = this.checkViewBlock();
+        // if (blocker != null) {
+        //     const build = this.renderer.getObjectByID(this.city.indexToID(blocker.i, blocker.j));
+        //     build.opacity = 0.2;
+        // }
 
         // Call update for each object in the updateList
         for (const obj of this.state.updateList) {
@@ -81,6 +91,12 @@ class SeedScene extends Scene {
     handleEvents(event) {
         // Ignore keypresses typed into a text box
         if (event.target.tagName === "INPUT") { return; }
+
+        if (!this.scene.state.started) {
+            if (event.key == " ") {
+                this.scene.state.started = true;
+            }
+        }
 
         if (!this.scene.state.inWeb) {
             let angle = null;
@@ -122,7 +138,6 @@ class SeedScene extends Scene {
     }
 
     updateCamera() {
-
         if (this.state.offset.x == 0 && this.state.offset.z == 0) {
             this.camera.position.set(0, 0, global.params.cameraOffset);
         } else {
@@ -141,6 +156,45 @@ class SeedScene extends Scene {
             }
             this.camera.position.applyAxisAngle(new Vector3(0,1,0), angle);
         }
+    }
+
+    checkViewBlock() {
+        const coords1 = this.city.coordsToIndex(this.state.displacement.x, this.state.displacement.z);
+        const coords2 = this.city.coordsToIndex(this.state.displacement.x + this.camera.position.x, 
+            this.state.displacement.z + this.camera.position.z);
+
+        for (var i = Math.min(coords1.i, coords2.i); i <= Math.max(coords1.i, coords2.i); i++) {
+            for (var j = Math.min(coords1.j, coords2.j); j <= Math.max(coords1.j, coords2.j); j++) {
+                if (this.data[i][j] >= 0) {
+                    const h = global.params.buildingHeight[this.data[i][j]];
+                    if (this.camera.position.y > h) continue;
+                    const box = this.city.boundingBoxAt(i, j);
+                    const points = [{x: box.min.x, z: box.min.z},
+                                    {x: box.min.x, z: box.max.z},
+                                    {x: box.max.x, z: box.max.z},
+                                    {x: box.max.x, z: box.min.z}];
+                    if (this.intersectsWithLine(points[0], points[1], coords1, coords2)) return {i: i, j: j};
+                    if (this.intersectsWithLine(points[1], points[2], coords1, coords2)) return {i: i, j: j};
+                    if (this.intersectsWithLine(points[3], points[2], coords1, coords2)) return {i: i, j: j};
+                    if (this.intersectsWithLine(points[0], points[3], coords1, coords2)) return {i: i, j: j};
+                }
+            }
+        }
+    }
+
+    intersectsWithLine(lineMin, lineMax, pMin, pMax) {
+        const EPS = global.params.EPS;
+        if (Math.abs(lineMin.x - lineMax.x) < EPS) {
+            const xDist = pMax.x - pMin.x;
+            const z = pMin.z * (pMax.x - lineMin.x) / xDist + pMax.z * (lineMin.x - pMin.x) / xDist;
+            if (z < (lineMax.z + EPS) && z > (lineMin.z - EPS)) return true;
+        } else {
+            const zDist = pMax.z - pMin.z;
+            const x = pMin.x * (pMax.z - lineMin.z) / zDist + pMax.x * (lineMin.z - pMin.z) / zDist;
+            if (x < (lineMax.x + EPS) && x > (lineMin.x - EPS)) return true;
+        }
+
+        return false;
     }
 
     applyGravity() {
@@ -164,7 +218,7 @@ class SeedScene extends Scene {
     applyRelease() {
         this.state.inWeb = false;
         this.state.webDir = "";
-        let force = new Vector3(-this.state.offset.x, Math.max(0, -this.state.offset.y * 0.1), -this.state.offset.z);
+        let force = new Vector3(-this.state.offset.x, 0/*Math.max(0, -this.state.offset.y * 0.1)*/, -this.state.offset.z);
         force.normalize().multiplyScalar(global.params.STRENGTH);
         this.state.netForce.add(force);
     }
@@ -197,7 +251,7 @@ class SeedScene extends Scene {
             }
 
             // changed swing direction: abort web and redo calc
-            else if (norm.dot(this.state.swingNorm) < 0.1 || this.state.pivot.y < 0.1) {
+            else if (norm.dot(this.state.swingNorm) < 0.05 || this.state.pivot.y < 0.1) {
                 this.state.swingNorm = null;
                 this.state.netForce = new THREE.Vector3();
                 this.applyGravity();
@@ -207,8 +261,7 @@ class SeedScene extends Scene {
             } 
         }
 
-        const dispOffset = new THREE.Vector2(x_next.x, x_next.y);
-        this.state.displacement.add(dispOffset);
+        this.state.displacement.add(x_next);
         this.state.offset = x_next;
         this.state.netForce = new THREE.Vector3();
     }

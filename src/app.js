@@ -12,8 +12,8 @@ import SeedScene from './components/scenes/SeedScene';
 
 // Initialize core ThreeJS components
 const camera = new PerspectiveCamera();
-const scene = new SeedScene(camera);
 const renderer = new WebGLRenderer({ antialias: true });
+const scene = new SeedScene(camera, renderer);
 
 renderer.shadowMap.enabled = true;
 
