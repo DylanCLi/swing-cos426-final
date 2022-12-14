@@ -1,0 +1,11 @@
+Model Information:
+* title:	Street Light Post
+* source:	https://sketchfab.com/3d-models/street-light-post-714031af7a4e4f92ab2b463f4180ee5c
+* author:	gabrielmendesm (https://sketchfab.com/gabrielmendesm)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Street Light Post" (https://sketchfab.com/3d-models/street-light-post-714031af7a4e4f92ab2b463f4180ee5c) by gabrielmendesm (https://sketchfab.com/gabrielmendesm) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -66,11 +66,12 @@ class Params {
         //                          City Setup 
         // ====================================================================
         // number of types of buildings
-        this.numTypes = 4;
+        this.numDefaultTypes = 3;
+        this.numBuildTypes = 4;
 
         // dimensions
         this.buildingWidth = 15;
-        this.buildingHeight = [ this.initHeight, this.initHeight, 30, 50 ];
+        this.objHeight = [ this.initHeight, 30, 50, this.initHeight, 5 ];
         
         // probability of building on a city grid
         this.buildProb = 0.2;
@@ -80,7 +81,7 @@ class Params {
         this.buildProb1 = this.buildProb * this.buildCondProb[0];
 
         // dimensions of city grid
-        this.citySize = 51;
+        this.citySize = 11;
 
         // padding around destination and start
         this.padding = 3;
@@ -92,10 +93,10 @@ class Params {
         //                      Geometries and Materials
         // ====================================================================
         this.buildingGeo = [
-            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[0], this.buildingWidth),
-            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[1], this.buildingWidth),
-            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[2], this.buildingWidth),
-            new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[3], this.buildingWidth)
+            new THREE.BoxGeometry(this.buildingWidth, this.objHeight[0], this.buildingWidth),
+            new THREE.BoxGeometry(this.buildingWidth, this.objHeight[1], this.buildingWidth),
+            new THREE.BoxGeometry(this.buildingWidth, this.objHeight[2], this.buildingWidth),
+            new THREE.BoxGeometry(this.buildingWidth, this.objHeight[3], this.buildingWidth)
         ];
         this.buildingMat = new THREE.MeshPhongMaterial();
         this.buildingMat.transparent = true;

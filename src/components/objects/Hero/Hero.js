@@ -65,41 +65,6 @@ class Hero extends THREE.Group {
         parent.addToUpdateList(this);    
     }
 
-    initHead() {
-        const headGeo = new THREE.BoxGeometry(HEAD_SIZE, HEAD_SIZE, HEAD_SIZE);
-        this.parts.head = new THREE.Mesh(headGeo, heroMat);
-        this.parts.head.position.set(0, - HEAD_SIZE / 2);
-    }
-
-    initBody() {
-        const bodyGeo = new THREE.BoxGeometry(BODY_WIDTH, BODY_LENGTH, BODY_WIDTH);
-        this.parts.body = new THREE.Mesh(bodyGeo, heroMat);
-        this.parts.body.position.set(0, -HEIGHT + LEG_LENGTH + PADDING + BODY_LENGTH / 2, 0);
-    }
-
-    initArms() {
-        this.parts.leftShoulder.position.set(-BODY_WIDTH / 2 - PADDING - ARM_WIDTH / 2, -HEAD_SIZE - PADDING, 0);
-        this.parts.rightShoulder.position.set(BODY_WIDTH / 2 + PADDING + ARM_WIDTH / 2, -HEAD_SIZE - PADDING, 0);
-
-        const armGeo = new THREE.BoxGeometry(ARM_WIDTH, ARM_LENGTH, ARM_WIDTH);
-        this.parts.leftArm = new THREE.Mesh(armGeo, heroMat);
-        this.parts.rightArm = new THREE.Mesh(armGeo, heroMat);
-
-        this.parts.leftShoulder.add(this.parts.leftArm);
-        this.parts.rightShoulder.add(this.parts.rightArm);
-
-        this.parts.leftArm.position.set(0, -ARM_LENGTH / 2, 0);
-        this.parts.rightArm.position.set(0, -ARM_LENGTH / 2, 0);
-    }
-
-    initLegs() {
-        const legGeo = new THREE.BoxGeometry(LEG_WIDTH, LEG_LENGTH, LEG_WIDTH);
-        this.parts.leftLeg = new THREE.Mesh(legGeo, heroMat);
-        this.parts.rightLeg = new THREE.Mesh(legGeo, heroMat);
-        this.parts.leftLeg.position.set(-BODY_WIDTH / 2 + LEG_WIDTH / 2, -HEIGHT + LEG_LENGTH / 2, 0);            
-        this.parts.rightLeg.position.set(BODY_WIDTH / 2 - LEG_WIDTH / 2, -HEIGHT + LEG_LENGTH / 2, 0);       
-    }
-
     update(state) {
         // from in web to out
         if (state.inWeb && !this.state.inWeb) {
@@ -135,18 +100,68 @@ class Hero extends THREE.Group {
         }
     }
 
-    handleCollision(bbox) {
+    handleCollision(height, bbox) {
         var collides = false;
-        Object.keys(this.parts).forEach( (key) => {
-            let partBox = new THREE.Box3().setFromObject(this.parts[key]);
-            if (partBox.intersectsBox(bbox)) {
-                collides = true;
-            } else if (partBox.containsBox(bbox)) {
-                collides = true;
-            } 
-        });
+
+        // land collision
+        if (height != undefined) {
+            let selfBox = new THREE.Box3().setFromObject(this);
+            if (height + selfBox.min.y < 0.1) collides = true;
+        } 
+        
+        // building collision
+        else if (bbox != undefined) {
+            Object.keys(this.parts).forEach( (key) => {
+                let partBox = new THREE.Box3().setFromObject(this.parts[key]);
+                if (partBox.intersectsBox(bbox)) {
+                    collides = true;
+                } else if (partBox.containsBox(bbox)) {
+                    collides = true;
+                } 
+            });
+
+            
+        }   
+        if (collides) {
+            this.rotation.set(0,0,0);
+        }
 
         return collides;
+    }
+
+    initHead() {
+        const headGeo = new THREE.BoxGeometry(HEAD_SIZE, HEAD_SIZE, HEAD_SIZE);
+        this.parts.head = new THREE.Mesh(headGeo, heroMat);
+        this.parts.head.position.set(0, - HEAD_SIZE / 2);
+    }
+
+    initBody() {
+        const bodyGeo = new THREE.BoxGeometry(BODY_WIDTH, BODY_LENGTH, BODY_WIDTH);
+        this.parts.body = new THREE.Mesh(bodyGeo, heroMat);
+        this.parts.body.position.set(0, -HEIGHT + LEG_LENGTH + PADDING + BODY_LENGTH / 2, 0);
+    }
+
+    initArms() {
+        this.parts.leftShoulder.position.set(-BODY_WIDTH / 2 - PADDING - ARM_WIDTH / 2, -HEAD_SIZE - PADDING, 0);
+        this.parts.rightShoulder.position.set(BODY_WIDTH / 2 + PADDING + ARM_WIDTH / 2, -HEAD_SIZE - PADDING, 0);
+
+        const armGeo = new THREE.BoxGeometry(ARM_WIDTH, ARM_LENGTH, ARM_WIDTH);
+        this.parts.leftArm = new THREE.Mesh(armGeo, heroMat);
+        this.parts.rightArm = new THREE.Mesh(armGeo, heroMat);
+
+        this.parts.leftShoulder.add(this.parts.leftArm);
+        this.parts.rightShoulder.add(this.parts.rightArm);
+
+        this.parts.leftArm.position.set(0, -ARM_LENGTH / 2, 0);
+        this.parts.rightArm.position.set(0, -ARM_LENGTH / 2, 0);
+    }
+
+    initLegs() {
+        const legGeo = new THREE.BoxGeometry(LEG_WIDTH, LEG_LENGTH, LEG_WIDTH);
+        this.parts.leftLeg = new THREE.Mesh(legGeo, heroMat);
+        this.parts.rightLeg = new THREE.Mesh(legGeo, heroMat);
+        this.parts.leftLeg.position.set(-BODY_WIDTH / 2 + LEG_WIDTH / 2, -HEIGHT + LEG_LENGTH / 2, 0);            
+        this.parts.rightLeg.position.set(BODY_WIDTH / 2 - LEG_WIDTH / 2, -HEIGHT + LEG_LENGTH / 2, 0);       
     }
 }
 

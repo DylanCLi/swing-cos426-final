@@ -1,0 +1,11 @@
+Model Information:
+* title:	Big Ben
+* source:	https://sketchfab.com/3d-models/big-ben-c8c3917864624058831ca02ac229fb12
+* author:	focara (https://sketchfab.com/Lord_Elliott01)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Big Ben" (https://sketchfab.com/3d-models/big-ben-c8c3917864624058831ca02ac229fb12) by focara (https://sketchfab.com/Lord_Elliott01) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

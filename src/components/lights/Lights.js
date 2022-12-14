@@ -15,9 +15,9 @@ class Lights extends Group {
         dir.target.position.set(0, 0, 0);
 
         this.add(
-            ambi, 
-            //hemi, 
-            //dir
+            ambi 
+            // hemi, 
+            // dir
             );
     }
 }

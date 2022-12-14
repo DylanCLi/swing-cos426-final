@@ -10,7 +10,7 @@ import * as THREE from 'three';
 class Building extends THREE.Group {
     constructor(parent, type) {
         // invalid building type
-        if (type < 0 || type >= global.params.numTypes) return;
+        if (type < 0 || type >= global.params.numBuildTypes) return;
 
         // Call parent Group() constructor
         super();

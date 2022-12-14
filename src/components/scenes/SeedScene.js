@@ -16,15 +16,15 @@ class SeedScene extends Scene {
         // Init state
         this.state = {
             started: false,
+            stuck: false,
+            stuckNorm: new Vector3(),
             displacement: new THREE.Vector3(0, global.params.initHeight, 0),
-            inAir: false,
             inWeb: false,
             webDir: "",
             pivot: new THREE.Vector3(),
             offset: new THREE.Vector3(),
             swingNorm: null,
             netForce: new THREE.Vector3(),
-            buildings: [],
             updateList: [],
         };
 
@@ -62,7 +62,7 @@ class SeedScene extends Scene {
 
     update(timeStamp) {
         if (!this.state.started) return;
-        this.applyGravity();
+        if (!this.state.stuck) this.applyGravity();
         if (this.state.inWeb) {
             this.applyTension();
             // this.applyPull();
@@ -85,13 +85,22 @@ class SeedScene extends Scene {
 
         var norm = this.handleCollision(norm);
         if (norm != null) {
-            this.state.started = false;
+            if (norm.y == 0)this.hero.lookAt(norm);
+            this.state.stuck = true;
+            this.state.stuckNorm = norm;
+            this.state.inWeb = false;
+            this.state.offset = new Vector3();
         }
         
     }
 
     handleCollision(norm) {
+        // ground
+        if (this.hero.handleCollision(this.state.displacement.y)) return new Vector3(0, 1, 0);
+
+        // building
         const center = this.city.coordsToIndex(this.state.displacement.x, this.state.displacement.z);
+        if (center == null) return center;
         const indices = [center];
         const s = [-1, 0, 1];
         for (var x = 0; x < s.length; x++) {
@@ -100,16 +109,18 @@ class SeedScene extends Scene {
                     const offset = this.city.coordsToIndex(
                         this.state.displacement.x + global.params.HEIGHT * s[x],
                         this.state.displacement.z + global.params.HEIGHT * s[z]);
+                    if (offset == null) continue;
                     if (center.i != offset.i || center.j != offset.j) indices.push(offset);
                 }
             }
         }
         for (let index of indices) {
-            if (this.city.data[index.i][index.j] < 0 || this.city.data[index.i][index.j] >= global.params.numTypes) continue;
+            if (this.city.data[index.i][index.j] < 0 || this.city.data[index.i][index.j] >= global.params.numBuildTypes) continue;
             const bbox = this.city.boundingBoxAt(index.i, index.j);
             bbox.min.sub(this.state.displacement);
             bbox.max.sub(this.state.displacement);
-            if (this.hero.handleCollision(bbox)) {
+            if (this.hero.handleCollision(undefined,bbox)) {
+
                 return new Vector3(center.i - index.i, 0, center.j - index.j).normalize();
             }
         }
@@ -193,7 +204,7 @@ class SeedScene extends Scene {
         for (var i = Math.min(coords1.i, coords2.i); i <= Math.max(coords1.i, coords2.i); i++) {
             for (var j = Math.min(coords1.j, coords2.j); j <= Math.max(coords1.j, coords2.j); j++) {
                 if (this.data[i][j] >= 0) {
-                    const h = global.params.buildingHeight[this.data[i][j]];
+                    const h = global.params.objHeight[this.data[i][j]];
                     if (this.camera.position.y > h) continue;
                     const box = this.city.boundingBoxAt(i, j);
                     const points = [{x: box.min.x, z: box.min.z},
