@@ -47,7 +47,7 @@ class Params {
         this.tanPhi = 3/4;
 
         // ====================================================================
-        //              Rendering properties of the scene
+        //                 Rendering properties of the scene
         // ====================================================================
         // distance of camera behind hero
         this.cameraOffset = 40;
@@ -63,7 +63,7 @@ class Params {
         this.webColor = 0xFFFFFF;
 
         // ====================================================================
-        //                      City Setup 
+        //                          City Setup 
         // ====================================================================
         // number of types of buildings
         this.numTypes = 4;
@@ -89,7 +89,7 @@ class Params {
         this.visRange = 25;
 
         // ====================================================================
-        //                 Geometries and Materials
+        //                      Geometries and Materials
         // ====================================================================
         this.buildingGeo = [
             new THREE.BoxGeometry(this.buildingWidth, this.buildingHeight[0], this.buildingWidth),
@@ -99,6 +99,19 @@ class Params {
         ];
         this.buildingMat = new THREE.MeshPhongMaterial();
         this.buildingMat.transparent = true;
+
+        // ====================================================================
+        //                          Hero Dimensions
+        // ====================================================================   
+        this.HEAD_SIZE = 0.3;
+        this.BODY_WIDTH = 0.3;
+        this.BODY_LENGTH = 0.4;
+        this.ARM_WIDTH = 0.1;
+        this.ARM_LENGTH = 0.5;
+        this.LEG_WIDTH = 0.12;
+        this.LEG_LENGTH = 0.2;
+        this.PADDING = 0.05;
+        this.HEIGHT = this.HEAD_SIZE + this.BODY_LENGTH + this.LEG_LENGTH + this.PADDING * 2;
     }
   
     // (Re)define all the properties that are derived from others

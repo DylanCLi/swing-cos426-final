@@ -1,7 +1,17 @@
 import * as THREE from 'three';
-import { ArrowHelper, Object3D, Vector3 } from 'three';
+import { Object3D, Vector3 } from 'three';
 
 const heroMat = new THREE.MeshPhongMaterial();
+
+// const HEAD_SIZE = global.params.HEAD_SIZE;
+// const BODY_WIDTH = global.params.BODY_WIDTH;
+// const BODY_LENGTH = global.params.BODY_LENGTH;
+// const ARM_WIDTH = global.params.ARM_WIDTH;
+// const ARM_LENGTH = global.params.ARM_LENGTH;
+// const LEG_WIDTH = global.params.LEG_WIDTH;
+// const LEG_LENGTH = global.params.LEG_LENGTH;
+// const PADDING = global.params.PADDING;
+// const HEIGHT = global.params.HEIGHT;
 
 const HEAD_SIZE = 0.3;
 const BODY_WIDTH = 0.3;
@@ -42,19 +52,6 @@ class Hero extends THREE.Group {
         this.initBody();
         this.initArms();
         this.initLegs();
-
-        // const testGeo = new THREE.BoxGeometry(0.5, 1, 0.5);
-        // const test = new THREE.Mesh(testGeo);
-        // this.add(test);
-        // test.position.set(0, -0.5, 0); 
-
-        // add meshes to group
-        // const bodyGeo = new THREE.SphereGeometry(0.5);
-        // bodyMat.color.setHex(SceneParams.heroColor);
-        // const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-        // bodyMesh.castShadow = true;
-        // bodyMesh.receiveShadow = true;
-        // this.add(bodyMesh);
 
         Object.keys(this.parts).forEach( (key) => {
             this.parts[key].castShadow = true;
@@ -120,16 +117,12 @@ class Hero extends THREE.Group {
             this.parts.rightShoulder.rotation.z = 0;
             this.parts.leftArm.position.add(new Vector3(0, -ARM_LENGTH, 0));
             this.parts.rightArm.position.add(new Vector3(0, -ARM_LENGTH, 0));
-
-            // this.rotateX = 0;
-            // this.rotateY = 0;
-            // this.rotateZ = 0;
-            // this.state.spineDir = new Vector3(0, -1, 0);
         }
 
         this.state.inWeb = state.inWeb;
 
         if (this.state.inWeb) {
+            // rotate hero with web direction
             const v = this.state.spineDir;
             const p = state.pivot.clone().normalize();
             const axis = new Vector3();
@@ -140,6 +133,20 @@ class Hero extends THREE.Group {
             this.rotateOnWorldAxis(axis, angle);
             this.state.spineDir = p.multiplyScalar(-1);
         }
+    }
+
+    handleCollision(bbox) {
+        var collides = false;
+        Object.keys(this.parts).forEach( (key) => {
+            let partBox = new THREE.Box3().setFromObject(this.parts[key]);
+            if (partBox.intersectsBox(bbox)) {
+                collides = true;
+            } else if (partBox.containsBox(bbox)) {
+                collides = true;
+            } 
+        });
+
+        return collides;
     }
 }
 

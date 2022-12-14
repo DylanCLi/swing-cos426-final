@@ -8,6 +8,7 @@ require('./textures/lambert1_emissive.jpeg');
 require('./textures/lambert1_metallicRoughness.png');
 require('./textures/lambert1_normal.png');
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { Box3 } from "three";
 
 var building;
 
@@ -44,7 +45,7 @@ class City extends THREE.Group {
             const a = new Array(global.params.citySize);
             for (var j = 0; j < a.length; j++) {
                 if (i == this.MIDDLE && j == this.START) {
-                    a[j] = 0;
+                    a[j] = -1;
                     continue;
                 } else if (i == this.MIDDLE && j == this.END) {
                     a[j] = 1;
@@ -82,6 +83,7 @@ class City extends THREE.Group {
             }
         }
 
+        parent.state.started = true;
         parent.addToUpdateList(this);
     }
 
@@ -104,16 +106,18 @@ class City extends THREE.Group {
     }
 
     boundingBoxAt(i, j) {
-        const height = global.params.buildingHeight[this.data[i][j]];
-        return {
-            min: {x: (i - this.MIDDLE - 0.5) * this.WIDTH, z: (j - this.START - 0.5) * this.WIDTH},
-            max: {x: (i - this.MIDDLE + 0.5) * this.WIDTH, z: (j + this.START - 0.5) * this.WIDTH},
-        }
+        const height = (this.data[i][j] >= 0 && this.data[i][j] < global.params.numTypes) ?
+                        global.params.buildingHeight[this.data[i][j]] :
+                        0;
+        const bbox = new Box3()
+        bbox.min.set((i - this.MIDDLE - 0.5) * this.WIDTH, 0, (j - this.START - 0.5) * this.WIDTH);
+        bbox.max.set((i - this.MIDDLE + 0.5) * this.WIDTH, height, (j - this.START + 0.5) * this.WIDTH);
+        return bbox;
     }
 
     update(state) {
         this.position.add(state.offset);
-        const coord = state.displacement.divideScalar(this.WIDTH);
+        //const coord = state.displacement.divideScalar(this.WIDTH);
 
     }
 }
