@@ -23,8 +23,8 @@ var pavement;
 var streetlight;
 //var clockTower;
 const loader = new GLTFLoader();
-const light1 = new THREE.PointLight(0xfceea7, 2, 50, 8);
-const light2 = new THREE.PointLight(0xfceea7, 2, 50, 8);
+const light1 = new THREE.PointLight(0xf3d265, 2, 60, 8);
+const light2 = new THREE.PointLight(0xf3d265, 2, 60, 8);
 
 class City extends THREE.Group {
     constructor(parent) {

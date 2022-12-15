@@ -58,8 +58,8 @@ class Params {
         
         // colors
         this.buildingColor = 0x4066e0;
-        this.landColor = 0x050505;
-        this.ambientColor = 0x191970;
+        this.landColor = 0x0a0613//0x050505;
+        this.ambientColor = 0x191970;//0x53539b//;
         this.heroColor = 0xff4f58;
         this.skyColor = 0xe000053;
         this.webColor = 0xFFFFFF;
@@ -68,7 +68,7 @@ class Params {
         //                          City Setup 
         // ====================================================================
         // dimensions of city grid (must be odd)
-        this.citySize = 51;
+        this.citySize = 41;
         
         // number of types of buildings
         this.numDefaultTypes = 4;
