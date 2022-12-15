@@ -1,19 +1,14 @@
 {
   "name": "swing",
-  "repository": "https://github.com/DylanCLi/swing-cos426-final.git",
+  "repository": "https://github.com/DylanCLi/web-swing.git",
   "version": "0.1.0",
-  "title": "Swing",
+  "title": "Web Swing",
   "description": "Final project for COS426",
   "keywords": [
     "Princeton",
     "graphics",
     "three.js",
-    "COS 426",
-    "ivy league",
-    "keyword1",
-    "keyword2",
-    "...",
-    "this last entry CANNOT have a comma after it ->"
+    "COS 426"
   ],
   "scripts": {
     "start": "webpack-dev-server --mode development --output-public-path \"\"",
