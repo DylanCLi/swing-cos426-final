@@ -9,11 +9,13 @@
 import { WebGLRenderer, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SeedScene from './components/scenes/SeedScene';
+import * as pages from './components/text/pages.js';
 
 // Initialize core ThreeJS components
 const camera = new PerspectiveCamera();
 const renderer = new WebGLRenderer({ antialias: true });
-const scene = new SeedScene(camera, renderer);
+var scene = new SeedScene(camera, renderer);
+global.params.scene = scene;
 
 renderer.shadowMap.enabled = true;
 
@@ -42,8 +44,8 @@ controls.update();
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
     controls.update();
-    renderer.render(scene, camera);
-    scene.update && scene.update(timeStamp);
+    renderer.render(global.params.scene, camera);
+    global.params.scene.update && global.params.scene.update(timeStamp);
     window.requestAnimationFrame(onAnimationFrameHandler);
 };
 window.requestAnimationFrame(onAnimationFrameHandler);
@@ -57,3 +59,5 @@ const windowResizeHandler = () => {
 };
 windowResizeHandler();
 window.addEventListener('resize', windowResizeHandler, false);
+
+//pages.init_page(document, canvas);

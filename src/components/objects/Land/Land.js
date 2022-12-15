@@ -18,6 +18,9 @@ class Land extends THREE.Group {
         land.receiveShadow = true;
         this.add(land);
 
+        land.rotation.set(Math.PI / -2, 0, 0);
+        land.position.set(0, -global.params.initHeight, 0);
+
         parent.addToUpdateList(this);
     }
 

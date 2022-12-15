@@ -1,23 +1,20 @@
 import * as Dat from 'dat.gui';
 import * as THREE from 'three';
 import { Scene, Color, Vector3, MathUtils, Vector2 } from 'three';
-import { Hero, Land, Web, City } from 'objects';
+import { Hero, Land, Web, City, Clouds } from 'objects';
 import { Lights } from 'lights';
 
 class SeedScene extends Scene {
-    constructor(camera, renderer) {
+    constructor(camera) {
         // Call parent Scene() constructor
         super();
 
         window.scene = this;
         this.camera = camera;
-        this.renderer = renderer;
 
         // Init state
         this.state = {
             started: false,
-            stuck: false,
-            stuckNorm: new Vector3(),
             displacement: new THREE.Vector3(0, global.params.initHeight, 0),
             inWeb: false,
             webDir: "",
@@ -34,26 +31,38 @@ class SeedScene extends Scene {
         // Add meshes to scene
         this.hero = new Hero(this);
         this.city = new City(this);
+        this.land = new Land(this);
         const lights = new Lights();        
-        const land = new Land(this);
         const web = new Web(this); 
-
-        // position
-        //hero.position.set(0,0,0);
-        land.rotation.set(Math.PI / -2, 0, 0);
-        const offset = 0//((global.params.citySize - 1) / 2 - global.params.padding) * global.params.buildingWidth;
-        land.position.set(0, -global.params.initHeight, offset);
+        const clouds = new Clouds(this);
 
         this.add(
             lights, 
             this.hero, 
             web,
-            land,
+            this.land,
             this.city,
+            clouds,
         );
+        const h = global.params.objHeight[global.params.numDefaultTypes - 1];
+        const ih = global.params.initHeight;
+            const y = h - ih;
+        clouds.position.add(new Vector3(0, 
+            y, 
+            global.params.buildingWidth * ((global.params.citySize + 1) / 2) - global.params.padding));
+
 
         // event handlers
         window.addEventListener("keydown", this.handleEvents);
+    }
+
+    reset(didWin) {
+        if (didWin) {
+            global.params.buildProbCenter += 0.05;
+            global.params.buildProbEdge += 0.025;
+        }        
+        this.camera.position.set(0, 0, -global.params.cameraOffset);
+        global.params.scene = new SeedScene(this.camera);
     }
 
     addToUpdateList(object) {
@@ -62,41 +71,31 @@ class SeedScene extends Scene {
 
     update(timeStamp) {
         if (!this.state.started) return;
-        if (!this.state.stuck) this.applyGravity();
+        this.applyGravity();
         if (this.state.inWeb) {
             this.applyTension();
-            // this.applyPull();
         }
         this.integrate();
 
         // camera offset
-        if (this.state.inWeb) this.updateCamera();
-
-        // const blocker = this.checkViewBlock();
-        // if (blocker != null) {
-        //     const build = this.renderer.getObjectByID(this.city.indexToID(blocker.i, blocker.j));
-        //     build.opacity = 0.2;
-        // }
+        this.updateCamera();
 
         // Call update for each object in the updateList
         for (const obj of this.state.updateList) {
             obj.update(this.state);
         }
 
-        var norm = this.handleCollision(norm);
+        var norm = this.handleCollision();
         if (norm != null) {
-            if (norm.y == 0)this.hero.lookAt(norm);
-            this.state.stuck = true;
-            this.state.stuckNorm = norm;
+            if (norm.y == 0) this.hero.lookAt(norm);
             this.state.inWeb = false;
             this.state.offset = new Vector3();
         }
-        
     }
 
-    handleCollision(norm) {
+    handleCollision() {
         // ground
-        if (this.hero.handleCollision(this.state.displacement.y)) return new Vector3(0, 1, 0);
+        if (this.hero.handleCollision(this.state.displacement.y)) this.reset(false);//return new Vector3(0, 1, 0);
 
         // building
         const center = this.city.coordsToIndex(this.state.displacement.x, this.state.displacement.z);
@@ -115,12 +114,13 @@ class SeedScene extends Scene {
             }
         }
         for (let index of indices) {
-            if (this.city.data[index.i][index.j] < 0 || this.city.data[index.i][index.j] >= global.params.numBuildTypes) continue;
             const bbox = this.city.boundingBoxAt(index.i, index.j);
+            if (bbox == null) continue;
             bbox.min.sub(this.state.displacement);
             bbox.max.sub(this.state.displacement);
             if (this.hero.handleCollision(undefined,bbox)) {
-
+                if (index.i == this.city.MIDDLE && index.j == this.city.END) this.reset(true);
+                else this.reset(false);
                 return new Vector3(center.i - index.i, 0, center.j - index.j).normalize();
             }
         }
@@ -136,7 +136,7 @@ class SeedScene extends Scene {
             }
         }
 
-        if (!this.scene.state.inWeb) {
+        if (!this.scene.state.inWeb && this.scene.state.displacement.y < global.params.objHeight[3]) {
             let angle = null;
             let dir = "";
             if (event.key == "q") {
@@ -163,21 +163,17 @@ class SeedScene extends Scene {
 
     changePivot(angle, dir) {
         const yAxis = new THREE.Vector3(0,1,0);
-        //let forward = this.state.offset.clone().multiplyScalar(-1).normalize(); 
         const forward = this.camera.position.clone().multiplyScalar(-1).normalize();
         const elevation = global.params.tanPhi;
         forward.setComponent(1, elevation).normalize().multiplyScalar(global.params.webLength);
         forward.applyAxisAngle(yAxis, angle);
         this.state.pivot = forward;
         this.state.webDir = dir;
-        // const zAxis = new THREE.Vector3(0,0,1);
-        //const rotation = zAxis.angleTo(forward) + angle;
-        //this.state.pivot = global.params.forwardPivot.clone().applyAxisAngle(yAxis, rotation);
     }
 
     updateCamera() {
         if (this.state.offset.x == 0 && this.state.offset.z == 0) {
-            this.camera.position.set(0, 0, global.params.cameraOffset);
+            //this.camera.position.set(0, 0, global.params.cameraOffset);
         } else {
             const forward = new Vector2(this.state.offset.x, this.state.offset.z);
             const curr = new Vector2(this.camera.position.x, this.camera.position.z);
@@ -247,16 +243,11 @@ class SeedScene extends Scene {
         this.state.netForce.add(tension);
     }
 
-    // to accelerate along swing
-    applyPull() {
-        let force = this.state.offset.clone().multiplyScalar(-1.1);
-        this.state.netForce.add(force);
-    }
-
-    applyRelease() {
+    applyRelease(applyForce) {
         this.state.inWeb = false;
         this.state.webDir = "";
-        let force = new Vector3(-this.state.offset.x, 0/*Math.max(0, -this.state.offset.y * 0.1)*/, -this.state.offset.z);
+        if (applyForce == false) return;
+        let force = new Vector3(-this.state.offset.x, 0, -this.state.offset.z);
         force.normalize().multiplyScalar(global.params.STRENGTH);
         this.state.netForce.add(force);
     }
@@ -291,7 +282,7 @@ class SeedScene extends Scene {
                 this.state.swingNorm = null;
                 this.state.netForce = new THREE.Vector3();
                 this.applyGravity();
-                this.applyRelease();
+                this.applyRelease(false);
                 this.integrate();
                 return;
             } 

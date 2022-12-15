@@ -106,7 +106,9 @@ class Hero extends THREE.Group {
         // land collision
         if (height != undefined) {
             let selfBox = new THREE.Box3().setFromObject(this);
-            if (height + selfBox.min.y < 0.1) collides = true;
+            if (height + selfBox.min.y < 0) {
+                collides = true;
+            }
         } 
         
         // building collision

@@ -1,4 +1,3 @@
-import Building from "../Building/Building";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import BUILDING_MODEL from './building/scene.gltf';
@@ -19,44 +18,19 @@ require('./bigben/scene.bin');
 require('./bigben/textures/Material_51_baseColor.png');
 require('./bigben/textures/Material_52_baseColor.png');
 
-// import CLOCK_MODEL from './clock_tower_big_ben/scene.gltf';
-// require('./clock_tower_big_ben/scene.bin');
-// require('./clock_tower_big_ben/textures/Standard_13_baseColor.jpeg');
-
-// import CLOCK_MODEL from './big_ben/scene.gltf';
-// require('./big_ben/scene.bin');
-// require('./big_ben/textures/Material.007_baseColor.png');
-// require('./big_ben/textures/Material.013_baseColor.png');
-// require('./big_ben/textures/Material.014_baseColor.png');
-// require('./big_ben/textures/Material.015_baseColor.png');
-// require('./big_ben/textures/Material.016_baseColor.png');
-// require('./big_ben/textures/PRINCIPAL_baseColor.png');
-// require('./big_ben/textures/PRINCIPAL.001_baseColor.png');
-
-// import CLOCK_MODEL from './clocktower/scene.gltf';
-// require('./clocktower/scene.bin');
-// require('./clocktower/textures/bottom_diffuse.png');
-// require('./clocktower/textures/bottom_normal.png');
-// require('./clocktower/textures/brick_orange_diffuse.png');
-// require('./clocktower/textures/brick_orange_middle_diffuse.png');
-// require('./clocktower/textures/brick_orange_middle_normal.png');
-// require('./clocktower/textures/brick_orange_normal.png');
-// require('./clocktower/textures/material_diffuse.png');
-// require('./clocktower/textures/material_normal.png');
-
 import LIGHT_MODEL from './streetlight/scene.gltf';
 require('./streetlight/scene.bin');
 
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { Box3, Vector3 } from "three";
+import { Box3 } from "three";
 
 var building;
 var pavement;
 var streetlight;
 //var clockTower;
 const loader = new GLTFLoader();
-const light1 = new THREE.PointLight(0xfceea7, 5, 20, 10);
-const light2 = new THREE.PointLight(0xfceea7, 5, 20, 10);
+const light1 = new THREE.PointLight(0xfceea7, 5, 30, 10);
+const light2 = new THREE.PointLight(0xfceea7, 5, 30, 10);
 
 class City extends THREE.Group {
     constructor(parent) {
@@ -78,12 +52,16 @@ class City extends THREE.Group {
 
         this.lightIndex = {i: this.MIDDLE, j: this.START};
         
-        this.loadClock();
-        this.loadBuilding();
+        this.loadObjects();
         light1.position.set(0, -global.params.initHeight - 5, 0);
         light2.position.set(0, -global.params.initHeight - 5, 0);
         this.add(light1);
         this.add(light2);
+    }
+
+    loadObjects() {
+        this.loadClock();
+        this.loadBuilding();
     }
 
     loadBuilding() {
@@ -92,7 +70,7 @@ class City extends THREE.Group {
             const box = new THREE.Box3().setFromObject(building);
             this.buildingMeshWidth = box.max.x - box.min.x;
             this.buildingMeshHeight = box.max.y - box.min.y;
-            this.loadPavement();
+            this.loadLight();
         });
     }
 
@@ -100,7 +78,7 @@ class City extends THREE.Group {
         loader.load(PAVEMENT_MODEL, (gltf) => {
             pavement = gltf.scene;
             const box = new THREE.Box3().setFromObject(pavement);
-            this.pavementMeshWidth = box.max.x - box.min.x;
+            this.pavementMeshWidth = (box.max.x - box.min.x) * 1.01;
             this.loadLight();
         });
     }
@@ -131,28 +109,47 @@ class City extends THREE.Group {
             clockTower.position.set(coords.x - center.x, 
                 -global.params.initHeight - box2.min.y,//+ global.params.objHeight[global.params.numDefaultTypes] / 2, 
                 coords.z - center.z);
+            
             this.add(clockTower);
         });
     }
 
     init() {
         // populate city data
-        const BUILD_PROB_0 = global.params.buildCondProb[0] * global.params.buildProb;
-            const BUILD_PROB_1 = global.params.buildProb;
+        const BUILD_PROB_CENTER = global.params.buildProbCenter;
+        const BUILD_PROB_1 = global.params.buildProb1;
+        const BUILD_PROB_2 = global.params.buildProb2;
+        const BUILD_PROB_3 = global.params.buildProb3;
+        const PROB_SLOPE = (global.params.buildProbEdge - global.params.buildProbCenter) / ((this.data.length - 1) / 2);
         for (var i = 0; i < this.data.length; i++) {
             const a = new Array(global.params.citySize);
+            const PROB_OFFSET = Math.abs(i - this.MIDDLE) * PROB_SLOPE;
             for (var j = 0; j < a.length; j++) {
+                // start
                 if (i == this.MIDDLE && j == this.START) {
-                    a[j] = global.params.numBuildTypes;
-                } else if (i == this.MIDDLE && j == this.END) {
+                    a[j] = 0;
+                } 
+                
+                // end
+                else if (i == this.MIDDLE && j == this.END) {
                     a[j] = global.params.numDefaultTypes;
-                } else if (Math.abs(i - this.MIDDLE) <= 2  && (Math.abs(j - this.START) <= 2 || Math.abs(j - this.END) <= 2)) {
+                } 
+                
+                // near start or end
+                else if (Math.abs(i - this.MIDDLE) <= 3  && (Math.abs(j - this.START) <= 3 || Math.abs(j - this.END) <= 3)) {
                     a[j] = global.params.numBuildTypes;
-                } else {
+                } 
+
+                // middle lane blocker
+                else if (i == this.MIDDLE && j == this.MIDDLE) a[j] = 3;
+                
+                // normal building / pavement streetlight
+                else {
                     const p = Math.random();
-                    if (p < BUILD_PROB_0) a[j] = 1;
-                    else if (p < BUILD_PROB_1) a[j] = 2;
-                    else a[j] = global.params.numBuildTypes;
+                    if (p < (BUILD_PROB_CENTER + PROB_OFFSET) * BUILD_PROB_1) a[j] = 1; // default 1
+                    else if (p < (BUILD_PROB_CENTER + PROB_OFFSET) * BUILD_PROB_2) a[j] = 2; //default 2
+                    else if (p < (BUILD_PROB_CENTER + PROB_OFFSET) * BUILD_PROB_3) a[j] = 3;
+                    else a[j] = global.params.numBuildTypes; // streetlight
                 }
             }
             this.data[i] = a;
@@ -166,11 +163,13 @@ class City extends THREE.Group {
                 const coords = this.indexToCoords(i, j);
                 // starting square
                 if (this.data[i][j] == 0) {
-                    light.position.set(coords.x, -global.params.initHeight, coords.z);
-                    this.add(light);
+                    // const p = new SkeletonUtils.clone(pavement);
+                    // p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
+                    // p.position.set(coords.x, -global.params.initHeight, coords.z);
+                    // this.add(p);
                 }
                 // default building square
-                if (this.data[i][j] >= 0 && this.data[i][j] < global.params.numDefaultTypes) {
+                else if (this.data[i][j] >= 0 && this.data[i][j] < global.params.numDefaultTypes) {
                     const b = new SkeletonUtils.clone(building);
                     b.scale.set(this.WIDTH / this.buildingMeshWidth, 
                                 global.params.objHeight[this.data[i][j]] / this.buildingMeshHeight,
@@ -180,10 +179,10 @@ class City extends THREE.Group {
                 } 
                 // clock tower square
                 else if (this.data[i][j] == global.params.numDefaultTypes) {
-                    const p = new SkeletonUtils.clone(pavement);
-                    p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
-                    p.position.set(coords.x, -global.params.initHeight, coords.z);
-                    this.add(p);
+                    // const p = new SkeletonUtils.clone(pavement);
+                    // p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
+                    // p.position.set(coords.x, -global.params.initHeight, coords.z);
+                    // this.add(p);
                 }
 
                 // street light square
@@ -195,23 +194,19 @@ class City extends THREE.Group {
                         this.add(sl);
                     //}
 
-                    const p = new SkeletonUtils.clone(pavement);
-                    p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
-                    p.position.set(coords.x, -global.params.initHeight, coords.z);
-                    this.add(p);
+                    // const p = new SkeletonUtils.clone(pavement);
+                    // p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
+                    // p.position.set(coords.x, -global.params.initHeight, coords.z);
+                    // this.add(p);
                 }
             }
         }
 
-        this.parent.state.started = true;
         this.parent.addToUpdateList(this);
     }
 
-    indexToName(i, j) {
-        return String(i) + "_" + String(j);
-    }
-
     indexToCoords(i, j) {
+        if (!this.inBounds(i, j)) return null;
         return {
             x: (i - this.MIDDLE) * this.WIDTH,
             z: (j - this.START) * this.WIDTH,
@@ -221,7 +216,7 @@ class City extends THREE.Group {
     coordsToIndex(x, z) {
         const i = Math.round(x / this.WIDTH + this.MIDDLE);
         const j = Math.round(z / this.WIDTH + this.START);
-        if (i < 0 || i >= this.data.length || j < 0 || j >= this.data[i].length) return null;
+        if (!this.inBounds(i, j)) return null;
         return {
             i: i,
             j: j,
@@ -229,20 +224,27 @@ class City extends THREE.Group {
     }
 
     boundingBoxAt(i, j) {
-        const height = (this.data[i][j] >= 0 && this.data[i][j] < global.params.numBuildTypes) ?
-                        global.params.objHeight[this.data[i][j]] :
-                        0;
+        if (this.inBounds(i, j) && this.data[i][j] == global.params.numBuildTypes) return null;
+
+        const height = global.params.objHeight[this.data[i][j]];
         const bbox = new Box3()
         bbox.min.set((i - this.MIDDLE - 0.5) * this.WIDTH, 0, (j - this.START - 0.5) * this.WIDTH);
         bbox.max.set((i - this.MIDDLE + 0.5) * this.WIDTH, height, (j - this.START + 0.5) * this.WIDTH);
         return bbox;
     }
 
+    inBounds(i, j) {
+        if (i < 0 || j < 0 || i >= this.data.length || j >= this.data.length) return false;
+        else return true;
+    }
+
     update(state) {
         this.position.add(state.offset);
         const index = this.coordsToIndex(state.displacement.x, state.displacement.z);
+        if (index == null) return;
         if (this.lightIndex.i != index.i || this.lightIndex.j != index.j) {
             const coords = this.indexToCoords(index.i, index.j);
+            if (coords == null) return null;
             light1.position.set(coords.x + 0.2, 
                 global.params.objHeight[global.params.numBuildTypes] - 0.5 - global.params.initHeight,
                 coords.z + 0.2);
