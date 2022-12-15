@@ -62,6 +62,7 @@ class SeedScene extends Scene {
             global.params.buildProbEdge += 0.025;
         }        
         this.camera.position.set(0, 0, -global.params.cameraOffset);
+        this.camera.lookAt(0, 0, 0);
         global.params.scene = new SeedScene(this.camera);
     }
 
@@ -190,6 +191,8 @@ class SeedScene extends Scene {
             }
             this.camera.position.applyAxisAngle(new Vector3(0,1,0), angle);
         }
+
+        this.camera.lookAt(0, 0, 0);
     }
 
     checkViewBlock() {
