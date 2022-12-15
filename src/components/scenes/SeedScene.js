@@ -1,6 +1,5 @@
-import * as Dat from 'dat.gui';
 import * as THREE from 'three';
-import { Scene, Color, Vector3, MathUtils, Vector2 } from 'three';
+import { Scene, Color, Vector3, Vector2 } from 'three';
 import { Hero, Land, Web, City, Clouds } from 'objects';
 import { Lights } from 'lights';
 
