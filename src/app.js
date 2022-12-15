@@ -9,7 +9,6 @@
 import { WebGLRenderer, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SeedScene from './components/scenes/SeedScene';
-import * as pages from './components/text/pages.js';
 
 // Initialize core ThreeJS components
 const camera = new PerspectiveCamera();
@@ -59,5 +58,3 @@ const windowResizeHandler = () => {
 };
 windowResizeHandler();
 window.addEventListener('resize', windowResizeHandler, false);
-
-//pages.init_page(document, canvas);

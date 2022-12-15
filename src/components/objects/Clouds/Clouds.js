@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import { Box3, Vector3 } from 'three';
+import { Box3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { init_fonts } from '../../text/pages';
 
 import CLOUD_MODEL from './cloud/scene.gltf';
 require('./cloud/scene.bin');
