@@ -17,7 +17,7 @@ class Params {
         this.MASS = 0.1;
     
         // Acceleration due to gravity, scaled up experimentally for effect.
-        this.GRAVITY = 9.8;
+        this.GRAVITY = 8.0;
 
         // Release strength
         this.STRENGTH = 15.0;
@@ -35,7 +35,7 @@ class Params {
         //                      Physical Setup
         // ====================================================================
         // initial height of land
-        this.initHeight = 70;
+        this.initHeight = 80;
         
         // length of web
         this.webLength = 20;
@@ -76,7 +76,7 @@ class Params {
 
         // dimensions
         this.buildingWidth = 20;
-        this.objHeight = [ 0, 30, 40, 50, this.initHeight, 10 ];
+        this.objHeight = [ 0, 50, 60, 70, this.initHeight, 10 ];
         
         // probability of building on a city grid
         this.buildProbCenter = 0.1;
@@ -98,15 +98,7 @@ class Params {
         // ====================================================================
         //                          Hero Dimensions
         // ====================================================================   
-        this.HEAD_SIZE = 0.3;
-        this.BODY_WIDTH = 0.3;
-        this.BODY_LENGTH = 0.4;
-        this.ARM_WIDTH = 0.1;
-        this.ARM_LENGTH = 0.5;
-        this.LEG_WIDTH = 0.12;
-        this.LEG_LENGTH = 0.2;
-        this.PADDING = 0.05;
-        this.HEIGHT = this.HEAD_SIZE + this.BODY_LENGTH + this.LEG_LENGTH + this.PADDING * 2;
+        this.HEIGHT = 1;
     }
   }
 

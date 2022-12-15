@@ -7,12 +7,6 @@ require('./building/textures/lambert1_emissive.jpeg');
 require('./building/textures/lambert1_metallicRoughness.png');
 require('./building/textures/lambert1_normal.png');
 
-import PAVEMENT_MODEL from './pavement/scene.gltf';
-require('./pavement/scene.bin');
-require('./pavement/textures/zamkova_dlazba_DiffuseMap_baseColor.jpeg');
-require('./pavement/textures/zamkova_dlazba_DiffuseMap_metallicRoughness.png');
-require('./pavement/textures/zamkova_dlazba_DiffuseMap_normal.jpeg');
-
 import CLOCK_MODEL from './bigben/scene.gltf';
 require('./bigben/scene.bin');
 require('./bigben/textures/Material_51_baseColor.png');
@@ -29,12 +23,14 @@ var pavement;
 var streetlight;
 //var clockTower;
 const loader = new GLTFLoader();
-const light1 = new THREE.PointLight(0xfceea7, 5, 30, 10);
-const light2 = new THREE.PointLight(0xfceea7, 5, 30, 10);
+const light1 = new THREE.PointLight(0xfceea7, 2, 50, 8);
+const light2 = new THREE.PointLight(0xfceea7, 2, 50, 8);
 
 class City extends THREE.Group {
     constructor(parent) {
         super();
+
+        this.isLoaded = false;
 
         this.START = global.params.padding;
         this.END = global.params.citySize - global.params.padding - 1;
@@ -70,15 +66,6 @@ class City extends THREE.Group {
             const box = new THREE.Box3().setFromObject(building);
             this.buildingMeshWidth = box.max.x - box.min.x;
             this.buildingMeshHeight = box.max.y - box.min.y;
-            this.loadLight();
-        });
-    }
-
-    loadPavement() {
-        loader.load(PAVEMENT_MODEL, (gltf) => {
-            pavement = gltf.scene;
-            const box = new THREE.Box3().setFromObject(pavement);
-            this.pavementMeshWidth = (box.max.x - box.min.x) * 1.01;
             this.loadLight();
         });
     }
@@ -161,15 +148,8 @@ class City extends THREE.Group {
         for (var i = 0; i < this.data.length; i++) {
             for (var j = 0; j < this.data.length; j++) {
                 const coords = this.indexToCoords(i, j);
-                // starting square
-                if (this.data[i][j] == 0) {
-                    // const p = new SkeletonUtils.clone(pavement);
-                    // p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
-                    // p.position.set(coords.x, -global.params.initHeight, coords.z);
-                    // this.add(p);
-                }
                 // default building square
-                else if (this.data[i][j] >= 0 && this.data[i][j] < global.params.numDefaultTypes) {
+                if (this.data[i][j] > 0 && this.data[i][j] < global.params.numDefaultTypes) {
                     const b = new SkeletonUtils.clone(building);
                     b.scale.set(this.WIDTH / this.buildingMeshWidth, 
                                 global.params.objHeight[this.data[i][j]] / this.buildingMeshHeight,
@@ -177,31 +157,17 @@ class City extends THREE.Group {
                     b.position.set(coords.x, -global.params.initHeight, coords.z);
                     this.add(b);
                 } 
-                // clock tower square
-                else if (this.data[i][j] == global.params.numDefaultTypes) {
-                    // const p = new SkeletonUtils.clone(pavement);
-                    // p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
-                    // p.position.set(coords.x, -global.params.initHeight, coords.z);
-                    // this.add(p);
-                }
-
                 // street light square
-                else {
-                    //if (Math.abs(i - this.MIDDLE) <= 1  && (Math.abs(j - this.START) <= 1 || Math.abs(j - this.END) <= 1)) {                    
-                        const sl = new SkeletonUtils.clone(streetlight);
-                        sl.scale.set(1, global.params.objHeight[this.data[i][j]] / this.lightMeshHeight, 1);
-                        sl.position.set(coords.x, -global.params.initHeight, coords.z);
-                        this.add(sl);
-                    //}
-
-                    // const p = new SkeletonUtils.clone(pavement);
-                    // p.scale.set(this.WIDTH / this.pavementMeshWidth, 1, this.WIDTH / this.pavementMeshWidth);
-                    // p.position.set(coords.x, -global.params.initHeight, coords.z);
-                    // this.add(p);
+                else if (this.data[i][j] != 0) {
+                    const sl = new SkeletonUtils.clone(streetlight);
+                    sl.scale.set(1, global.params.objHeight[this.data[i][j]] / this.lightMeshHeight, 1);
+                    sl.position.set(coords.x, -global.params.initHeight, coords.z);
+                    this.add(sl);
                 }
             }
         }
 
+        this.isLoaded = true;
         this.parent.addToUpdateList(this);
     }
 
@@ -214,6 +180,7 @@ class City extends THREE.Group {
     }
 
     coordsToIndex(x, z) {
+        if (!this.isLoaded) return null;
         const i = Math.round(x / this.WIDTH + this.MIDDLE);
         const j = Math.round(z / this.WIDTH + this.START);
         if (!this.inBounds(i, j)) return null;
@@ -224,6 +191,7 @@ class City extends THREE.Group {
     }
 
     boundingBoxAt(i, j) {
+        if (!this.isLoaded) return null;
         if (this.inBounds(i, j) && this.data[i][j] == global.params.numBuildTypes) return null;
 
         const height = global.params.objHeight[this.data[i][j]];
@@ -239,18 +207,19 @@ class City extends THREE.Group {
     }
 
     update(state) {
+        if (!this.isLoaded) return null;
         this.position.add(state.offset);
         const index = this.coordsToIndex(state.displacement.x, state.displacement.z);
         if (index == null) return;
         if (this.lightIndex.i != index.i || this.lightIndex.j != index.j) {
             const coords = this.indexToCoords(index.i, index.j);
             if (coords == null) return null;
-            light1.position.set(coords.x + 0.2, 
+            light1.position.set(coords.x + 0.3, 
                 global.params.objHeight[global.params.numBuildTypes] - 0.5 - global.params.initHeight,
-                coords.z + 0.2);
-            light2.position.set(coords.x - 0.2, 
+                coords.z + 0.3);
+            light2.position.set(coords.x - 0.3, 
                 global.params.objHeight[global.params.numBuildTypes] - 0.5 - global.params.initHeight,
-                coords.z - 0.2);
+                coords.z - 0.3);
             this.lightIndex = index;            
         }
     }

@@ -8,7 +8,7 @@ class Web extends THREE.Group {
         this.scene = parent;
         this.web = {
             geo: new THREE.BufferGeometry(),
-            mat: new THREE.MeshPhongMaterial(),
+            mat: new THREE.MeshBasicMaterial(),
             line: null,
         }
 
@@ -18,10 +18,10 @@ class Web extends THREE.Group {
         };
 
         // add meshes to group
-        const points = [new THREE.Vector3(), parent.state.pivot];
+        const points = [parent.state.pivot.clone().multiplyScalar(0.005), parent.state.pivot];
         this.web.geo.setFromPoints(points);
         this.web.mat.color = SceneParams.webColor;
-        this.web.line = new THREE.Line(this.web.geo, /*this.web.mat*/);
+        this.web.line = new THREE.Line(this.web.geo);
         
         if (this.state.inWeb) this.add(this.web.line);
 
@@ -31,19 +31,15 @@ class Web extends THREE.Group {
 
     update(state) {
         if (state.inWeb) {
-            if (state.offset)
             state.pivot.add(state.offset);
-            this.web.geo.setFromPoints([new THREE.Vector3(), state.pivot]);
+            this.web.geo.setFromPoints([state.pivot.clone().multiplyScalar(0.005), state.pivot]);
             if (!this.state.inWeb) {
                 this.add(this.web.line);
                 this.state.inWeb = true;
-            }
-            
-            
+            } 
         } else if (this.state.inWeb) {
             this.remove(this.web.line);
             this.state.inWeb = false;
-            //this.scene.applyReleaseForce();
         }
     }
 }

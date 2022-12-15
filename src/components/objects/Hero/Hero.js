@@ -3,24 +3,14 @@ import { Object3D, Vector3 } from 'three';
 
 const heroMat = new THREE.MeshPhongMaterial();
 
-// const HEAD_SIZE = global.params.HEAD_SIZE;
-// const BODY_WIDTH = global.params.BODY_WIDTH;
-// const BODY_LENGTH = global.params.BODY_LENGTH;
-// const ARM_WIDTH = global.params.ARM_WIDTH;
-// const ARM_LENGTH = global.params.ARM_LENGTH;
-// const LEG_WIDTH = global.params.LEG_WIDTH;
-// const LEG_LENGTH = global.params.LEG_LENGTH;
-// const PADDING = global.params.PADDING;
-// const HEIGHT = global.params.HEIGHT;
-
-const HEAD_SIZE = 0.3;
-const BODY_WIDTH = 0.3;
-const BODY_LENGTH = 0.4;
-const ARM_WIDTH = 0.1;
-const ARM_LENGTH = 0.5;
-const LEG_WIDTH = 0.12;
+const HEAD_SIZE = 0.2;
+const BODY_WIDTH = 0.2;
+const BODY_LENGTH = 0.3;
+const ARM_WIDTH = 0.07;
+const ARM_LENGTH = 0.4;
+const LEG_WIDTH = 0.07;
 const LEG_LENGTH = 0.2;
-const PADDING = 0.05;
+const PADDING = 0.03;
 const HEIGHT = HEAD_SIZE + BODY_LENGTH + LEG_LENGTH + PADDING * 2;
 
 class Hero extends THREE.Group {
@@ -28,6 +18,7 @@ class Hero extends THREE.Group {
         // Call parent Group() constructor
         super();
 
+        global.params.HEIGHT = HEIGHT;
         heroMat.color.setHex(global.params.heroColor);
 
         // Init state
